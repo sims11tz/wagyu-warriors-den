@@ -14,10 +14,15 @@ interface MainLayoutProps {
 export const MainLayout: React.FC<MainLayoutProps> = ({ className }) => {
   const [activeTab, setActiveTab] = useState("profile");
 
+  const handleEditProfile = () => {
+    // Profile editing functionality would be implemented here
+    // For now, this is a placeholder for the edit profile action
+  };
+
   const renderContent = () => {
     switch (activeTab) {
       case "profile":
-        return <WarriorProfile onEditProfile={() => console.log("Edit profile")} />;
+        return <WarriorProfile onEditProfile={handleEditProfile} />;
       case "butcher":
         return <ButcherStudio />;
       case "table":
@@ -27,7 +32,7 @@ export const MainLayout: React.FC<MainLayoutProps> = ({ className }) => {
       case "events":
         return <EventsPage />;
       default:
-        return <WarriorProfile onEditProfile={() => console.log("Edit profile")} />;
+        return <WarriorProfile onEditProfile={handleEditProfile} />;
     }
   };
 

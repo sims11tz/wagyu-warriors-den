@@ -8,6 +8,7 @@ import { Label } from '@/components/ui/label';
 import { useToast } from '@/hooks/use-toast';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Checkbox } from '@/components/ui/checkbox';
+import { sanitizeInput, sanitizeHandle, isValidEmail } from '@/utils/security';
 
 const Auth = () => {
   const [email, setEmail] = useState('');
@@ -29,7 +30,12 @@ const Auth = () => {
 
   const handleSignIn = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!email || !password) {
+    
+    // Sanitize inputs
+    const cleanEmail = sanitizeInput(email);
+    const cleanPassword = password; // Don't sanitize passwords as they may contain special chars
+    
+    if (!cleanEmail || !cleanPassword) {
       toast({
         title: "Missing credentials",
         description: "Please enter both email and password.",
@@ -37,9 +43,18 @@ const Auth = () => {
       });
       return;
     }
+
+    if (!isValidEmail(cleanEmail)) {
+      toast({
+        title: "Invalid email",
+        description: "Please enter a valid email address.",
+        variant: "destructive",
+      });
+      return;
+    }
     
     setLoading(true);
-    const { error } = await signIn(email, password);
+    const { error } = await signIn(cleanEmail, cleanPassword);
     setLoading(false);
     
     if (error) {
@@ -59,10 +74,37 @@ const Auth = () => {
 
   const handleSignUp = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!email || !password) {
+    
+    // Sanitize inputs
+    const cleanEmail = sanitizeInput(email);
+    const cleanPassword = password; // Don't sanitize passwords
+    let cleanHandle = null;
+    
+    if (handle.trim()) {
+      cleanHandle = sanitizeHandle(handle);
+      if (!cleanHandle) {
+        toast({
+          title: "Invalid handle",
+          description: "Handle must be 3-20 characters, letters, numbers, underscore, or dash only.",
+          variant: "destructive",
+        });
+        return;
+      }
+    }
+    
+    if (!cleanEmail || !cleanPassword) {
       toast({
         title: "Missing information",
         description: "Please enter email and password.",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    if (!isValidEmail(cleanEmail)) {
+      toast({
+        title: "Invalid email",
+        description: "Please enter a valid email address.",
         variant: "destructive",
       });
       return;
@@ -78,7 +120,7 @@ const Auth = () => {
     }
     
     setLoading(true);
-    const { error } = await signUp(email, password, handle);
+    const { error } = await signUp(cleanEmail, cleanPassword, cleanHandle || undefined);
     setLoading(false);
     
     if (error) {
