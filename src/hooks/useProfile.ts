@@ -25,6 +25,7 @@ export const useProfile = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [avatarUrl, setAvatarUrl] = useState<string | null>(null);
+  const [refreshKey, setRefreshKey] = useState(0);
   const { user } = useAuth();
 
   const fetchAvatarUrl = async (avatarId: string) => {
@@ -85,7 +86,7 @@ export const useProfile = () => {
     };
 
     fetchProfile();
-  }, [user]);
+  }, [user, refreshKey]);
 
   // Update avatar URL when avatar_id changes
   useEffect(() => {
@@ -121,6 +122,9 @@ export const useProfile = () => {
           setAvatarUrl(null);
         }
       }
+      
+      // Force a refresh to ensure UI updates
+      setRefreshKey(prev => prev + 1);
       
       return { error: null };
     } catch (err) {
