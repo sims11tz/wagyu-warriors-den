@@ -14,7 +14,125 @@ export type Database = {
   }
   public: {
     Tables: {
-      [_ in never]: never
+      event_rsvps: {
+        Row: {
+          created_at: string
+          event_id: string
+          id: string
+          status: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          event_id: string
+          id?: string
+          status: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          event_id?: string
+          id?: string
+          status?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "event_rsvps_event_id_fkey"
+            columns: ["event_id"]
+            isOneToOne: false
+            referencedRelation: "events"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      events: {
+        Row: {
+          created_at: string
+          description: string | null
+          dress_code: string | null
+          ends_at: string
+          id: string
+          menu_highlights: string[] | null
+          starts_at: string
+          title: string
+          venue: string | null
+        }
+        Insert: {
+          created_at?: string
+          description?: string | null
+          dress_code?: string | null
+          ends_at: string
+          id?: string
+          menu_highlights?: string[] | null
+          starts_at: string
+          title: string
+          venue?: string | null
+        }
+        Update: {
+          created_at?: string
+          description?: string | null
+          dress_code?: string | null
+          ends_at?: string
+          id?: string
+          menu_highlights?: string[] | null
+          starts_at?: string
+          title?: string
+          venue?: string | null
+        }
+        Relationships: []
+      }
+      profiles: {
+        Row: {
+          age_verified: boolean | null
+          avatar_url: string | null
+          bio: string | null
+          created_at: string
+          favorites: Json | null
+          handle: string | null
+          id: string
+          marbling_points: number | null
+          sear_score: number | null
+          smoke_rings: number | null
+          tier: string | null
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          age_verified?: boolean | null
+          avatar_url?: string | null
+          bio?: string | null
+          created_at?: string
+          favorites?: Json | null
+          handle?: string | null
+          id?: string
+          marbling_points?: number | null
+          sear_score?: number | null
+          smoke_rings?: number | null
+          tier?: string | null
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          age_verified?: boolean | null
+          avatar_url?: string | null
+          bio?: string | null
+          created_at?: string
+          favorites?: Json | null
+          handle?: string | null
+          id?: string
+          marbling_points?: number | null
+          sear_score?: number | null
+          smoke_rings?: number | null
+          tier?: string | null
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never
