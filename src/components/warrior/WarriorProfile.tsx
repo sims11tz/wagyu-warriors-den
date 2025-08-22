@@ -14,10 +14,18 @@ export const WarriorProfile: React.FC<WarriorProfileProps> = ({ onEditProfile })
   const { profile, loading, error, getAvatarUrl } = useProfile();
   const [avatarUrl, setAvatarUrl] = useState<string | null>(null);
 
+  // Update avatar URL whenever avatar_id changes
   useEffect(() => {
-    if (profile?.avatar_id) {
-      getAvatarUrl(profile.avatar_id).then(setAvatarUrl);
-    }
+    const updateAvatarUrl = async () => {
+      if (profile?.avatar_id) {
+        const url = await getAvatarUrl(profile.avatar_id);
+        setAvatarUrl(url);
+      } else {
+        setAvatarUrl(null);
+      }
+    };
+    
+    updateAvatarUrl();
   }, [profile?.avatar_id, getAvatarUrl]);
 
   if (loading) {
@@ -56,8 +64,9 @@ export const WarriorProfile: React.FC<WarriorProfileProps> = ({ onEditProfile })
     );
   }
 
-  const defaultHandle = profile.handle || 'New Warrior';
-  const defaultBio = profile.bio || 'A fresh warrior ready to master the art of beef.';
+  // These will update immediately when profile changes
+  const displayHandle = profile.handle || 'New Warrior';
+  const displayBio = profile.bio || 'A fresh warrior ready to master the art of beef.';
   const tierName = profile.tier === 'guest' ? 'New Warrior' : 
                   profile.tier === 'member' ? 'Active Warrior' : 'Founding Warrior';
 
@@ -71,13 +80,14 @@ export const WarriorProfile: React.FC<WarriorProfileProps> = ({ onEditProfile })
             {avatarUrl ? (
               <img
                 src={avatarUrl}
-                alt={defaultHandle}
+                alt={displayHandle}
                 className="w-20 h-20 rounded-full object-cover border-3 border-warrior-gold warrior-shadow-gold"
+                key={avatarUrl} // Force re-render when avatar changes
               />
             ) : (
               <div className="w-20 h-20 rounded-full bg-warrior-gold/20 border-3 border-warrior-gold warrior-shadow-gold flex items-center justify-center">
                 <span className="text-2xl font-bold text-warrior-gold">
-                  {defaultHandle.charAt(0).toUpperCase()}
+                  {displayHandle.charAt(0).toUpperCase()}
                 </span>
               </div>
             )}
@@ -89,7 +99,7 @@ export const WarriorProfile: React.FC<WarriorProfileProps> = ({ onEditProfile })
           <div className="flex-1">
             <div className="flex items-center justify-between">
               <div>
-                <h1 className="text-xl font-bold text-foreground">{defaultHandle}</h1>
+                <h1 className="text-xl font-bold text-foreground">{displayHandle}</h1>
                 <Badge variant="outline" className="border-warrior-gold text-warrior-gold bg-warrior-gold/10 mt-1">
                   <Trophy size={12} className="mr-1" />
                   {tierName}
@@ -101,7 +111,7 @@ export const WarriorProfile: React.FC<WarriorProfileProps> = ({ onEditProfile })
             </div>
             
             <p className="text-sm text-muted-foreground mt-3 leading-relaxed">
-              {defaultBio}
+              {displayBio}
             </p>
           </div>
         </div>

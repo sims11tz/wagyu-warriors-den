@@ -43,7 +43,7 @@ export const EditProfileModal: React.FC<EditProfileModalProps> = ({ open, onClos
   const handleAvatarSelect = async (avatarId: string) => {
     setFormData(prev => ({ ...prev, avatar_id: avatarId }));
     
-    // Auto-save avatar selection
+    // Auto-save avatar selection immediately
     if (profile) {
       const { error } = await updateProfile({ avatar_id: avatarId });
       if (error) {

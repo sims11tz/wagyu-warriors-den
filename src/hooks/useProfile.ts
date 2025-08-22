@@ -69,7 +69,9 @@ export const useProfile = () => {
         return { error: error.message };
       }
 
-      setProfile({ ...profile, ...updates });
+      // Update local state immediately
+      const updatedProfile = { ...profile, ...updates };
+      setProfile(updatedProfile);
       return { error: null };
     } catch (err) {
       return { error: 'Failed to update profile' };
@@ -84,10 +86,11 @@ export const useProfile = () => {
         .from('avatar_options')
         .select('image_url')
         .eq('id', avatarId)
-        .single();
+        .maybeSingle();
       
       return data?.image_url || null;
-    } catch {
+    } catch (error) {
+      console.error('Error fetching avatar URL:', error);
       return null;
     }
   };
