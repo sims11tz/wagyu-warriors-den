@@ -24,11 +24,36 @@ export const useProfile = () => {
   const [profile, setProfile] = useState<Profile | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [avatarUrl, setAvatarUrl] = useState<string | null>(null);
   const { user } = useAuth();
+
+  const fetchAvatarUrl = async (avatarId: string) => {
+    if (!avatarId) {
+      setAvatarUrl(null);
+      return null;
+    }
+    
+    try {
+      const { data } = await supabase
+        .from('avatar_options')
+        .select('image_url')
+        .eq('id', avatarId)
+        .maybeSingle();
+      
+      const url = data?.image_url || null;
+      setAvatarUrl(url);
+      return url;
+    } catch (error) {
+      console.error('Error fetching avatar URL:', error);
+      setAvatarUrl(null);
+      return null;
+    }
+  };
 
   useEffect(() => {
     if (!user) {
       setProfile(null);
+      setAvatarUrl(null);
       setLoading(false);
       return;
     }
@@ -45,6 +70,12 @@ export const useProfile = () => {
           setError(error.message);
         } else {
           setProfile(data);
+          // Fetch avatar URL if profile has avatar_id
+          if (data?.avatar_id) {
+            await fetchAvatarUrl(data.avatar_id);
+          } else {
+            setAvatarUrl(null);
+          }
         }
       } catch (err) {
         setError('Failed to fetch profile');
@@ -55,6 +86,15 @@ export const useProfile = () => {
 
     fetchProfile();
   }, [user]);
+
+  // Update avatar URL when avatar_id changes
+  useEffect(() => {
+    if (profile?.avatar_id) {
+      fetchAvatarUrl(profile.avatar_id);
+    } else {
+      setAvatarUrl(null);
+    }
+  }, [profile?.avatar_id]);
 
   const updateProfile = async (updates: Partial<Profile>) => {
     if (!user || !profile) return { error: 'No user or profile found' };
@@ -72,6 +112,16 @@ export const useProfile = () => {
       // Update local state immediately
       const updatedProfile = { ...profile, ...updates };
       setProfile(updatedProfile);
+      
+      // If avatar_id was updated, fetch new avatar URL immediately
+      if (updates.avatar_id !== undefined) {
+        if (updates.avatar_id) {
+          await fetchAvatarUrl(updates.avatar_id);
+        } else {
+          setAvatarUrl(null);
+        }
+      }
+      
       return { error: null };
     } catch (err) {
       return { error: 'Failed to update profile' };
@@ -99,7 +149,9 @@ export const useProfile = () => {
     profile,
     loading,
     error,
+    avatarUrl, // Expose current avatar URL
     updateProfile,
     getAvatarUrl,
+    fetchAvatarUrl, // Expose function to manually fetch avatar URL
   };
 };

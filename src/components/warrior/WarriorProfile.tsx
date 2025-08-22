@@ -4,29 +4,13 @@ import { StatCard } from "./StatCard";
 import { Flame, Target, Cigarette, Edit, Trophy, Star } from "lucide-react";
 import { useProfile } from "@/hooks/useProfile";
 import { Skeleton } from "@/components/ui/skeleton";
-import { useState, useEffect } from "react";
 
 interface WarriorProfileProps {
   onEditProfile: () => void;
 }
 
 export const WarriorProfile: React.FC<WarriorProfileProps> = ({ onEditProfile }) => {
-  const { profile, loading, error, getAvatarUrl } = useProfile();
-  const [avatarUrl, setAvatarUrl] = useState<string | null>(null);
-
-  // Update avatar URL whenever avatar_id changes
-  useEffect(() => {
-    const updateAvatarUrl = async () => {
-      if (profile?.avatar_id) {
-        const url = await getAvatarUrl(profile.avatar_id);
-        setAvatarUrl(url);
-      } else {
-        setAvatarUrl(null);
-      }
-    };
-    
-    updateAvatarUrl();
-  }, [profile?.avatar_id, getAvatarUrl]);
+  const { profile, loading, error, avatarUrl } = useProfile();
 
   if (loading) {
     return (
@@ -82,7 +66,7 @@ export const WarriorProfile: React.FC<WarriorProfileProps> = ({ onEditProfile })
                 src={avatarUrl}
                 alt={displayHandle}
                 className="w-20 h-20 rounded-full object-cover border-3 border-warrior-gold warrior-shadow-gold"
-                key={avatarUrl} // Force re-render when avatar changes
+                key={`${profile.avatar_id}-${avatarUrl}`} // Force re-render when avatar changes
               />
             ) : (
               <div className="w-20 h-20 rounded-full bg-warrior-gold/20 border-3 border-warrior-gold warrior-shadow-gold flex items-center justify-center">

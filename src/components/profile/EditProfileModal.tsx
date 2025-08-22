@@ -17,7 +17,7 @@ interface EditProfileModalProps {
 }
 
 export const EditProfileModal: React.FC<EditProfileModalProps> = ({ open, onClose }) => {
-  const { profile, updateProfile } = useProfile();
+  const { profile, updateProfile, avatarUrl } = useProfile();
   const { toast } = useToast();
   const [loading, setLoading] = useState(false);
   const [avatarSelectorOpen, setAvatarSelectorOpen] = useState(false);
@@ -45,7 +45,10 @@ export const EditProfileModal: React.FC<EditProfileModalProps> = ({ open, onClos
     
     // Auto-save avatar selection immediately
     if (profile) {
+      setLoading(true);
       const { error } = await updateProfile({ avatar_id: avatarId });
+      setLoading(false);
+      
       if (error) {
         toast({
           title: "Avatar Update Failed",
@@ -112,6 +115,8 @@ export const EditProfileModal: React.FC<EditProfileModalProps> = ({ open, onClos
     }));
   };
 
+  const displayHandle = profile?.handle || 'New Warrior';
+
   return (
     <>
       <Dialog open={open} onOpenChange={onClose}>
@@ -124,20 +129,42 @@ export const EditProfileModal: React.FC<EditProfileModalProps> = ({ open, onClos
           </DialogHeader>
 
           <form onSubmit={handleSubmit} className="space-y-4">
-            {/* Avatar Selection */}
+            {/* Avatar Selection with Preview */}
             <div className="space-y-2">
               <Label className="text-warrior-light">Avatar</Label>
-              <Button
-                type="button"
-                variant="ghost"
-                onClick={() => setAvatarSelectorOpen(true)}
-                className="w-full h-20 border-2 border-dashed border-warrior-gold/30 hover:border-warrior-gold/50 flex flex-col items-center justify-center gap-2"
-              >
-                <Camera className="w-6 h-6 text-warrior-gold" />
-                <span className="text-sm text-warrior-light">
-                  {formData.avatar_id ? 'Change Avatar' : 'Choose Avatar'}
-                </span>
-              </Button>
+              <div className="flex items-center gap-4">
+                {/* Current Avatar Preview */}
+                <div className="relative">
+                  {avatarUrl ? (
+                    <img
+                      src={avatarUrl}
+                      alt={displayHandle}
+                      className="w-16 h-16 rounded-full object-cover border-2 border-warrior-gold"
+                      key={`preview-${profile?.avatar_id}-${avatarUrl}`}
+                    />
+                  ) : (
+                    <div className="w-16 h-16 rounded-full bg-warrior-gold/20 border-2 border-warrior-gold flex items-center justify-center">
+                      <span className="text-lg font-bold text-warrior-gold">
+                        {displayHandle.charAt(0).toUpperCase()}
+                      </span>
+                    </div>
+                  )}
+                </div>
+                
+                {/* Change Avatar Button */}
+                <Button
+                  type="button"
+                  variant="ghost"
+                  onClick={() => setAvatarSelectorOpen(true)}
+                  className="flex-1 h-16 border-2 border-dashed border-warrior-gold/30 hover:border-warrior-gold/50 flex flex-col items-center justify-center gap-1"
+                  disabled={loading}
+                >
+                  <Camera className="w-5 h-5 text-warrior-gold" />
+                  <span className="text-xs text-warrior-light">
+                    {avatarUrl ? 'Change Avatar' : 'Choose Avatar'}
+                  </span>
+                </Button>
+              </div>
             </div>
 
             <div className="space-y-2">
@@ -149,6 +176,7 @@ export const EditProfileModal: React.FC<EditProfileModalProps> = ({ open, onClos
                 placeholder="Enter your warrior handle"
                 className="bg-warrior-dark/50 border-warrior-gold/30 text-warrior-light"
                 maxLength={20}
+                disabled={loading}
               />
               <p className="text-xs text-warrior-light/50">3-20 characters, letters, numbers, underscore, or dash only</p>
             </div>
@@ -163,6 +191,7 @@ export const EditProfileModal: React.FC<EditProfileModalProps> = ({ open, onClos
                 className="bg-warrior-dark/50 border-warrior-gold/30 text-warrior-light resize-none"
                 rows={3}
                 maxLength={500}
+                disabled={loading}
               />
               <p className="text-xs text-warrior-light/50">{formData.bio.length}/500 characters</p>
             </div>
@@ -172,6 +201,7 @@ export const EditProfileModal: React.FC<EditProfileModalProps> = ({ open, onClos
                 id="public_profile"
                 checked={formData.public_profile}
                 onCheckedChange={(checked) => handleChange('public_profile', checked as boolean)}
+                disabled={loading}
               />
               <Label htmlFor="public_profile" className="text-sm text-warrior-light">
                 Make my profile visible to other warriors
