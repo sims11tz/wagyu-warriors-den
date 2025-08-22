@@ -4,6 +4,7 @@ import { Badge } from "@/components/ui/badge";
 import { ChefHat, Play, RotateCcw, Save } from "lucide-react";
 import butcherKnife from "@/assets/butcher-knife.jpg";
 import wagyuHero from "@/assets/wagyu-hero.jpg";
+import { SlicingGame } from "./SlicingGame";
 
 const primalCuts = [
   { id: "ribeye", name: "Ribeye A5", grade: "Prime", color: "warrior-ember" },
@@ -14,18 +15,23 @@ const primalCuts = [
 
 export const ButcherKitchen: React.FC = () => {
   const [selectedCut, setSelectedCut] = useState<string | null>(null);
-  const [isSlicing, setIsSlicing] = useState(false);
   const [sliceScore, setSliceScore] = useState(0);
+  const [showSlicingGame, setShowSlicingGame] = useState(false);
+  const [totalCuts, setTotalCuts] = useState(0);
 
   const handleStartSlicing = () => {
     if (!selectedCut) return;
-    setIsSlicing(true);
-    
-    // Simulate slicing scoring
-    setTimeout(() => {
-      setSliceScore(Math.floor(Math.random() * 100) + 850);
-      setIsSlicing(false);
-    }, 2000);
+    setShowSlicingGame(true);
+  };
+
+  const handleGameComplete = (score: number, cuts: number) => {
+    setSliceScore(score);
+    setTotalCuts(cuts);
+    setShowSlicingGame(false);
+  };
+
+  const handleCloseGame = () => {
+    setShowSlicingGame(false);
   };
 
   return (
@@ -41,9 +47,12 @@ export const ButcherKitchen: React.FC = () => {
         </div>
 
         {sliceScore > 0 && (
-          <div className="mb-4">
+          <div className="mb-4 flex gap-2">
             <Badge variant="outline" className="border-warrior-gold text-warrior-gold bg-warrior-gold/10">
               Last Score: {sliceScore} points
+            </Badge>
+            <Badge variant="outline" className="border-warrior-ember text-warrior-ember bg-warrior-ember/10">
+              Cuts Made: {totalCuts}
             </Badge>
           </div>
         )}
@@ -118,20 +127,11 @@ export const ButcherKitchen: React.FC = () => {
             variant="warrior"
             size="lg"
             onClick={handleStartSlicing}
-            disabled={!selectedCut || isSlicing}
+            disabled={!selectedCut}
             className="w-full"
           >
-            {isSlicing ? (
-              <>
-                <div className="animate-spin w-4 h-4 border-2 border-warrior-dark border-t-transparent rounded-full mr-2" />
-                Slicing...
-              </>
-            ) : (
-              <>
-                <Play size={16} />
-                Start Cut
-              </>
-            )}
+            <Play size={16} />
+            Start Cut
           </Button>
           
           <Button
@@ -140,6 +140,7 @@ export const ButcherKitchen: React.FC = () => {
             onClick={() => {
               setSelectedCut(null);
               setSliceScore(0);
+              setTotalCuts(0);
             }}
             className="w-full"
           >
@@ -170,6 +171,16 @@ export const ButcherKitchen: React.FC = () => {
           <p>• Honor the marbling with precise cuts</p>
         </div>
       </div>
+
+      {/* Slicing Game Modal */}
+      {showSlicingGame && selectedCut && (
+        <SlicingGame
+          cutType={selectedCut}
+          cutName={primalCuts.find(c => c.id === selectedCut)?.name || ''}
+          onComplete={handleGameComplete}
+          onClose={handleCloseGame}
+        />
+      )}
     </div>
   );
 };
