@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { Coffee, Users, MessageCircle, Volume2 } from "lucide-react";
+import { Cigarette, Users, MessageCircle, Volume2 } from "lucide-react";
 
 const cigars = [
   { id: 1, name: "Cohiba Behike", strength: "Full", length: "6.5\"", ring: "52" },
@@ -24,7 +24,7 @@ export const CigarLounge: React.FC = () => {
       {/* Header */}
       <div className="warrior-glass rounded-xl p-6 border border-warrior-gold/20">
         <div className="flex items-center space-x-3">
-          <Coffee className="text-warrior-gold" size={24} />
+          <Cigarette className="text-warrior-gold" size={24} />
           <div>
             <h2 className="text-xl font-bold text-foreground">Cigar Lounge</h2>
             <p className="text-sm text-muted-foreground">Smoke with fellow warriors (21+ only)</p>

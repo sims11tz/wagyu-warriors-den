@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { User, ChefHat, Utensils, Coffee, Calendar, Settings } from "lucide-react";
+import { User, ChefHat, Utensils, Cigarette, Calendar, Settings } from "lucide-react";
 import { cn } from "@/lib/utils";
 
 interface BottomNavigationProps {
@@ -11,7 +11,7 @@ const navItems = [
   { id: "profile", icon: User, label: "Profile", color: "text-warrior-gold" },
   { id: "butcher", icon: ChefHat, label: "Studio", color: "text-warrior-ember" },
   { id: "table", icon: Utensils, label: "Table", color: "text-warrior-gold" },
-  { id: "lounge", icon: Coffee, label: "Lounge", color: "text-warrior-smoke" },
+  { id: "lounge", icon: Cigarette, label: "Lounge", color: "text-warrior-smoke" },
   { id: "events", icon: Calendar, label: "Events", color: "text-warrior-gold" },
 ];
 
