@@ -97,18 +97,20 @@ export const SlicingGame: React.FC<SlicingGameProps> = ({
     ctx.fillStyle = gradient;
     ctx.fillRect(50, 50, width - 100, height - 100);
     
-    // Draw static marbling pattern
-    ctx.strokeStyle = '#F5DEB3';
-    ctx.lineWidth = 2;
-    ctx.globalAlpha = 0.6;
-    
-    marblingPattern.forEach(({ x, y, size }) => {
-      ctx.beginPath();
-      ctx.arc(x, y, size, 0, Math.PI * 2);
-      ctx.stroke();
-    });
-    
-    ctx.globalAlpha = 1;
+    // Draw static marbling pattern only if it exists
+    if (marblingPattern.length > 0) {
+      ctx.strokeStyle = '#F5DEB3';
+      ctx.lineWidth = 2;
+      ctx.globalAlpha = 0.6;
+      
+      marblingPattern.forEach(({ x, y, size }) => {
+        ctx.beginPath();
+        ctx.arc(x, y, size, 0, Math.PI * 2);
+        ctx.stroke();
+      });
+      
+      ctx.globalAlpha = 1;
+    }
   }, [marblingPattern]);
 
   const drawGuideLines = useCallback((ctx: CanvasRenderingContext2D, width: number, height: number) => {
@@ -173,14 +175,16 @@ export const SlicingGame: React.FC<SlicingGameProps> = ({
     // Clear canvas
     ctx.clearRect(0, 0, width, height);
     
-    // Draw game elements
-    drawMeat(ctx, width, height);
-    if (!gameEnded) {
-      drawGuideLines(ctx, width, height);
+    // Always draw meat background when game is started
+    if (gameStarted) {
+      drawMeat(ctx, width, height);
+      if (!gameEnded) {
+        drawGuideLines(ctx, width, height);
+      }
+      drawCuts(ctx);
+      drawPreviewLine(ctx);
     }
-    drawCuts(ctx);
-    drawPreviewLine(ctx);
-  }, [cuts, gameEnded, previewLine, drawMeat, drawGuideLines, drawCuts, drawPreviewLine]);
+  }, [gameStarted, cuts, gameEnded, previewLine, marblingPattern, drawMeat, drawGuideLines, drawCuts, drawPreviewLine]);
 
   const handleMouseDown = (e: React.MouseEvent<HTMLCanvasElement>) => {
     if (!gameStarted || gameEnded) return;
