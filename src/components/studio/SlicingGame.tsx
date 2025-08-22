@@ -18,6 +18,12 @@ interface SliceLine {
   quality: 'perfect' | 'good' | 'poor';
 }
 
+interface MarblingPattern {
+  x: number;
+  y: number;
+  size: number;
+}
+
 export const SlicingGame: React.FC<SlicingGameProps> = ({
   cutType,
   cutName,
@@ -31,6 +37,8 @@ export const SlicingGame: React.FC<SlicingGameProps> = ({
   const [score, setScore] = useState(0);
   const [gameStarted, setGameStarted] = useState(false);
   const [gameEnded, setGameEnded] = useState(false);
+  const [marblingPattern, setMarblingPattern] = useState<MarblingPattern[]>([]);
+  const [previewLine, setPreviewLine] = useState<{ x1: number; y1: number; x2: number; y2: number } | null>(null);
 
   // Game timer
   useEffect(() => {
@@ -65,6 +73,19 @@ export const SlicingGame: React.FC<SlicingGameProps> = ({
     return (perfectCuts * 100) + (goodCuts * 60) + (poorCuts * 20);
   };
 
+  // Generate static marbling pattern on game start
+  const generateMarblingPattern = useCallback((width: number, height: number) => {
+    const pattern: MarblingPattern[] = [];
+    for (let i = 0; i < 8; i++) {
+      pattern.push({
+        x: 80 + Math.random() * (width - 160),
+        y: 80 + Math.random() * (height - 160),
+        size: 20 + Math.random() * 30,
+      });
+    }
+    setMarblingPattern(pattern);
+  }, []);
+
   const drawMeat = useCallback((ctx: CanvasRenderingContext2D, width: number, height: number) => {
     // Draw meat background
     const gradient = ctx.createLinearGradient(0, 0, width, height);
@@ -76,23 +97,19 @@ export const SlicingGame: React.FC<SlicingGameProps> = ({
     ctx.fillStyle = gradient;
     ctx.fillRect(50, 50, width - 100, height - 100);
     
-    // Draw marbling pattern
+    // Draw static marbling pattern
     ctx.strokeStyle = '#F5DEB3';
     ctx.lineWidth = 2;
     ctx.globalAlpha = 0.6;
     
-    for (let i = 0; i < 8; i++) {
+    marblingPattern.forEach(({ x, y, size }) => {
       ctx.beginPath();
-      const x = 80 + Math.random() * (width - 160);
-      const y = 80 + Math.random() * (height - 160);
-      const size = 20 + Math.random() * 30;
-      
       ctx.arc(x, y, size, 0, Math.PI * 2);
       ctx.stroke();
-    }
+    });
     
     ctx.globalAlpha = 1;
-  }, []);
+  }, [marblingPattern]);
 
   const drawGuideLines = useCallback((ctx: CanvasRenderingContext2D, width: number, height: number) => {
     ctx.strokeStyle = '#FFD700';
@@ -129,6 +146,21 @@ export const SlicingGame: React.FC<SlicingGameProps> = ({
     });
   }, [cuts]);
 
+  const drawPreviewLine = useCallback((ctx: CanvasRenderingContext2D) => {
+    if (!previewLine) return;
+    
+    ctx.strokeStyle = '#FFFFFF';
+    ctx.lineWidth = 2;
+    ctx.setLineDash([3, 3]);
+    ctx.globalAlpha = 0.8;
+    ctx.beginPath();
+    ctx.moveTo(previewLine.x1, previewLine.y1);
+    ctx.lineTo(previewLine.x2, previewLine.y2);
+    ctx.stroke();
+    ctx.setLineDash([]);
+    ctx.globalAlpha = 1;
+  }, [previewLine]);
+
   useEffect(() => {
     const canvas = canvasRef.current;
     if (!canvas) return;
@@ -147,7 +179,8 @@ export const SlicingGame: React.FC<SlicingGameProps> = ({
       drawGuideLines(ctx, width, height);
     }
     drawCuts(ctx);
-  }, [cuts, gameEnded, drawMeat, drawGuideLines, drawCuts]);
+    drawPreviewLine(ctx);
+  }, [cuts, gameEnded, previewLine, drawMeat, drawGuideLines, drawCuts, drawPreviewLine]);
 
   const handleMouseDown = (e: React.MouseEvent<HTMLCanvasElement>) => {
     if (!gameStarted || gameEnded) return;
@@ -165,24 +198,13 @@ export const SlicingGame: React.FC<SlicingGameProps> = ({
       const currentX = moveEvent.clientX - rect.left;
       const currentY = moveEvent.clientY - rect.top;
       
-      // Draw preview line
-      const ctx = canvas.getContext('2d');
-      if (ctx) {
-        ctx.clearRect(0, 0, canvas.width, canvas.height);
-        drawMeat(ctx, canvas.width, canvas.height);
-        drawGuideLines(ctx, canvas.width, canvas.height);
-        drawCuts(ctx);
-        
-        // Preview line
-        ctx.strokeStyle = '#FFFFFF';
-        ctx.lineWidth = 2;
-        ctx.setLineDash([3, 3]);
-        ctx.beginPath();
-        ctx.moveTo(startX, startY);
-        ctx.lineTo(currentX, currentY);
-        ctx.stroke();
-        ctx.setLineDash([]);
-      }
+      // Update preview line state instead of directly drawing
+      setPreviewLine({
+        x1: startX,
+        y1: startY,
+        x2: currentX,
+        y2: currentY,
+      });
     };
 
     const handleMouseUp = (upEvent: MouseEvent) => {
@@ -213,6 +235,7 @@ export const SlicingGame: React.FC<SlicingGameProps> = ({
       setCuts(prev => [...prev, newCut]);
       setScore(prev => prev + (quality === 'perfect' ? 100 : quality === 'good' ? 60 : 20));
       setIsSlicing(false);
+      setPreviewLine(null); // Clear preview line
 
       document.removeEventListener('mousemove', handleMouseMove);
       document.removeEventListener('mouseup', handleMouseUp);
@@ -223,11 +246,16 @@ export const SlicingGame: React.FC<SlicingGameProps> = ({
   };
 
   const startGame = () => {
+    const canvas = canvasRef.current;
+    if (canvas) {
+      generateMarblingPattern(canvas.width, canvas.height);
+    }
     setGameStarted(true);
     setTimeLeft(30);
     setCuts([]);
     setScore(0);
     setGameEnded(false);
+    setPreviewLine(null);
   };
 
   const perfectCuts = cuts.filter(cut => cut.quality === 'perfect').length;
