@@ -6,6 +6,11 @@ import { ChefsTable } from "@/components/social/ChefsTable";
 import { CigarLounge } from "@/components/lounge/CigarLounge";
 import { EventsPage } from "@/components/events/EventsPage";
 import { cn } from "@/lib/utils";
+import { useAuth } from "@/contexts/AuthContext";
+import { Button } from "@/components/ui/button";
+import { LogOut } from "lucide-react";
+import { useNavigate } from "react-router-dom";
+import { useToast } from "@/hooks/use-toast";
 
 interface MainLayoutProps {
   className?: string;
@@ -13,6 +18,26 @@ interface MainLayoutProps {
 
 export const MainLayout: React.FC<MainLayoutProps> = ({ className }) => {
   const [activeTab, setActiveTab] = useState("profile");
+  const { signOut } = useAuth();
+  const navigate = useNavigate();
+  const { toast } = useToast();
+
+  const handleLogout = async () => {
+    try {
+      await signOut();
+      toast({
+        title: "Farewell, Warrior",
+        description: "You have been signed out successfully.",
+      });
+      navigate('/');
+    } catch (error) {
+      toast({
+        title: "Logout Error",
+        description: "There was an issue signing out. Please try again.",
+        variant: "destructive",
+      });
+    }
+  };
 
   const handleEditProfile = () => {
     // Profile editing functionality would be implemented here
@@ -52,10 +77,21 @@ export const MainLayout: React.FC<MainLayoutProps> = ({ className }) => {
               </div>
             </div>
             
-            {/* Status Indicator */}
-            <div className="flex items-center space-x-2">
-              <div className="w-2 h-2 bg-warrior-gold rounded-full animate-warrior-pulse" />
-              <span className="text-xs text-muted-foreground">Online</span>
+            {/* Status Indicator & Logout */}
+            <div className="flex items-center space-x-4">
+              <div className="flex items-center space-x-2">
+                <div className="w-2 h-2 bg-warrior-gold rounded-full animate-warrior-pulse" />
+                <span className="text-xs text-muted-foreground">Online</span>
+              </div>
+              
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={handleLogout}
+                className="text-muted-foreground hover:text-warrior-gold hover:bg-warrior-gold/10"
+              >
+                <LogOut className="w-4 h-4" />
+              </Button>
             </div>
           </div>
         </div>
