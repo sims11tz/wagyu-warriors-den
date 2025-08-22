@@ -14,6 +14,36 @@ export type Database = {
   }
   public: {
     Tables: {
+      avatar_options: {
+        Row: {
+          age_group: string | null
+          created_at: string | null
+          description: string | null
+          gender: string | null
+          id: string
+          image_url: string
+          name: string
+        }
+        Insert: {
+          age_group?: string | null
+          created_at?: string | null
+          description?: string | null
+          gender?: string | null
+          id: string
+          image_url: string
+          name: string
+        }
+        Update: {
+          age_group?: string | null
+          created_at?: string | null
+          description?: string | null
+          gender?: string | null
+          id?: string
+          image_url?: string
+          name?: string
+        }
+        Relationships: []
+      }
       event_rsvps: {
         Row: {
           created_at: string
@@ -88,6 +118,7 @@ export type Database = {
       profiles: {
         Row: {
           age_verified: boolean | null
+          avatar_id: string | null
           avatar_url: string | null
           bio: string | null
           created_at: string
@@ -104,6 +135,7 @@ export type Database = {
         }
         Insert: {
           age_verified?: boolean | null
+          avatar_id?: string | null
           avatar_url?: string | null
           bio?: string | null
           created_at?: string
@@ -120,6 +152,7 @@ export type Database = {
         }
         Update: {
           age_verified?: boolean | null
+          avatar_id?: string | null
           avatar_url?: string | null
           bio?: string | null
           created_at?: string

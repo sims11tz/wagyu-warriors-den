@@ -4,13 +4,21 @@ import { StatCard } from "./StatCard";
 import { Flame, Target, Cigarette, Edit, Trophy, Star } from "lucide-react";
 import { useProfile } from "@/hooks/useProfile";
 import { Skeleton } from "@/components/ui/skeleton";
+import { useState, useEffect } from "react";
 
 interface WarriorProfileProps {
   onEditProfile: () => void;
 }
 
 export const WarriorProfile: React.FC<WarriorProfileProps> = ({ onEditProfile }) => {
-  const { profile, loading, error } = useProfile();
+  const { profile, loading, error, getAvatarUrl } = useProfile();
+  const [avatarUrl, setAvatarUrl] = useState<string | null>(null);
+
+  useEffect(() => {
+    if (profile?.avatar_id) {
+      getAvatarUrl(profile.avatar_id).then(setAvatarUrl);
+    }
+  }, [profile?.avatar_id, getAvatarUrl]);
 
   if (loading) {
     return (
@@ -60,11 +68,19 @@ export const WarriorProfile: React.FC<WarriorProfileProps> = ({ onEditProfile })
         <div className="absolute inset-0 bg-gradient-to-r from-warrior-gold/10 to-transparent" />
         <div className="relative flex items-start space-x-4">
           <div className="relative">
-            <div className="w-20 h-20 rounded-full bg-warrior-gold/20 border-3 border-warrior-gold warrior-shadow-gold flex items-center justify-center">
-              <span className="text-2xl font-bold text-warrior-gold">
-                {defaultHandle.charAt(0).toUpperCase()}
-              </span>
-            </div>
+            {avatarUrl ? (
+              <img
+                src={avatarUrl}
+                alt={defaultHandle}
+                className="w-20 h-20 rounded-full object-cover border-3 border-warrior-gold warrior-shadow-gold"
+              />
+            ) : (
+              <div className="w-20 h-20 rounded-full bg-warrior-gold/20 border-3 border-warrior-gold warrior-shadow-gold flex items-center justify-center">
+                <span className="text-2xl font-bold text-warrior-gold">
+                  {defaultHandle.charAt(0).toUpperCase()}
+                </span>
+              </div>
+            )}
             <div className="absolute -bottom-1 -right-1 p-1 bg-warrior-gold rounded-full">
               <Star size={12} className="text-warrior-dark" fill="currentColor" />
             </div>

@@ -11,6 +11,7 @@ interface Profile {
   public_profile: boolean;
   tier: string;
   avatar_url: string | null;
+  avatar_id: string | null;
   sear_score: number;
   marbling_points: number;
   smoke_rings: number;
@@ -75,10 +76,27 @@ export const useProfile = () => {
     }
   };
 
+  const getAvatarUrl = async (avatarId: string) => {
+    if (!avatarId) return null;
+    
+    try {
+      const { data } = await supabase
+        .from('avatar_options')
+        .select('image_url')
+        .eq('id', avatarId)
+        .single();
+      
+      return data?.image_url || null;
+    } catch {
+      return null;
+    }
+  };
+
   return {
     profile,
     loading,
     error,
     updateProfile,
+    getAvatarUrl,
   };
 };
