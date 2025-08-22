@@ -44,6 +44,33 @@ export type Database = {
         }
         Relationships: []
       }
+      cigar_lounges: {
+        Row: {
+          created_at: string
+          host_user_id: string
+          id: string
+          is_active: boolean
+          max_members: number
+          name: string
+        }
+        Insert: {
+          created_at?: string
+          host_user_id: string
+          id?: string
+          is_active?: boolean
+          max_members?: number
+          name: string
+        }
+        Update: {
+          created_at?: string
+          host_user_id?: string
+          id?: string
+          is_active?: boolean
+          max_members?: number
+          name?: string
+        }
+        Relationships: []
+      }
       event_rsvps: {
         Row: {
           created_at: string
@@ -115,6 +142,79 @@ export type Database = {
         }
         Relationships: []
       }
+      lounge_chat: {
+        Row: {
+          created_at: string
+          id: string
+          lounge_id: string
+          message: string
+          message_type: string | null
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          lounge_id: string
+          message: string
+          message_type?: string | null
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          lounge_id?: string
+          message?: string
+          message_type?: string | null
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "lounge_chat_lounge_id_fkey"
+            columns: ["lounge_id"]
+            isOneToOne: false
+            referencedRelation: "cigar_lounges"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      lounge_members: {
+        Row: {
+          cigar_status: string | null
+          id: string
+          joined_at: string
+          last_seen: string
+          lounge_id: string
+          selected_cigar_id: number | null
+          user_id: string
+        }
+        Insert: {
+          cigar_status?: string | null
+          id?: string
+          joined_at?: string
+          last_seen?: string
+          lounge_id: string
+          selected_cigar_id?: number | null
+          user_id: string
+        }
+        Update: {
+          cigar_status?: string | null
+          id?: string
+          joined_at?: string
+          last_seen?: string
+          lounge_id?: string
+          selected_cigar_id?: number | null
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "lounge_members_lounge_id_fkey"
+            columns: ["lounge_id"]
+            isOneToOne: false
+            referencedRelation: "cigar_lounges"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       profiles: {
         Row: {
           age_verified: boolean | null
@@ -174,6 +274,14 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
+      cleanup_inactive_members: {
+        Args: Record<PropertyKey, never>
+        Returns: undefined
+      }
+      update_member_last_seen: {
+        Args: { p_lounge_id: string }
+        Returns: undefined
+      }
       verify_user_age: {
         Args: { birth_date: string }
         Returns: boolean
