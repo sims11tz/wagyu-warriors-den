@@ -18,6 +18,11 @@ export default {
 			}
 		},
 		extend: {
+			fontFamily: {
+				sans: ["Inter", "sans-serif"],
+				cinzel: ["Cinzel", "serif"],
+				cormorant: ["Cormorant Garamond", "serif"],
+			},
 			colors: {
 				border: 'hsl(var(--border))',
 				input: 'hsl(var(--input))',
@@ -58,7 +63,8 @@ export default {
 					dark: 'hsl(var(--warrior-dark))',
 					leather: 'hsl(var(--warrior-leather))',
 					smoke: 'hsl(var(--warrior-smoke))',
-					ember: 'hsl(var(--warrior-ember))'
+					ember: 'hsl(var(--warrior-ember))',
+					light: 'hsl(var(--warrior-light))'
 				}
 			},
 			borderRadius: {
