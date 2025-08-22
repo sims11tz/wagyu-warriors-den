@@ -1,22 +1,22 @@
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { Cigarette, Users, MessageCircle, Volume2, LogOut } from "lucide-react";
+import { useAuth } from "@/contexts/AuthContext";
+import { useProfile } from "@/hooks/useProfile";
 import { useCigarLounges } from "@/hooks/useCigarLounges";
+import { useLoungeChat } from "@/hooks/useLoungeChat";
 import { CreateLoungeModal } from "./CreateLoungeModal";
 import { LoungeChat } from "./LoungeChat";
-import ProtectedRoute from "@/components/auth/ProtectedRoute";
+import { LoungeVisualizer } from "./LoungeVisualizer";
+import { CigarGame } from "@/components/studio/CigarGame";
+import { Shield, Users, MessageCircle, Plus, LogOut, Gamepad2 } from "lucide-react";
+import { useNavigate } from "react-router-dom";
 
-const cigars = [
-  { id: 1, name: "Cohiba Behike", strength: "Full", length: "6.5\"", ring: "52" },
-  { id: 2, name: "Montecristo No. 2", strength: "Medium", length: "6.1\"", ring: "52" },
-  { id: 3, name: "Romeo y Julieta", strength: "Mild", length: "5.5\"", ring: "42" },
-  { id: 4, name: "Padron 1964", strength: "Full", length: "6\"", ring: "50" },
-];
-
-const CigarLoungeContent: React.FC = () => {
-  const [selectedCigar, setSelectedCigar] = useState<number | null>(null);
-  const [showChat, setShowChat] = useState(false);
+export const CigarLounge = () => {
+  const navigate = useNavigate();
+  const { user } = useAuth();
+  const { profile } = useProfile();
   const { 
     lounges, 
     currentLounge, 
@@ -24,236 +24,251 @@ const CigarLoungeContent: React.FC = () => {
     loading, 
     joinLounge, 
     leaveCurrentLounge, 
-    createLounge, 
-    updateCigarStatus 
+    createLounge,
+    updateCigarStatus
   } = useCigarLounges();
+  
+  const { messages, sendMessage } = useLoungeChat(currentLounge?.id);
+  const [activeTab, setActiveTab] = useState<'lounge' | 'game' | 'chat'>('lounge');
 
-  const handleCigarAction = async (action: 'cut' | 'light' | 'smoke') => {
-    if (!currentLounge || !selectedCigar) return;
-    
-    await updateCigarStatus(
-      action === 'cut' ? 'cut' : action === 'light' ? 'lit' : 'smoking',
-      selectedCigar
-    );
-  };
-
-  const currentMember = members.find(m => m.user_id === currentLounge?.host_user_id);
-
-  if (loading) {
+  // Check if user needs age verification
+  if (!profile?.age_verified) {
     return (
-      <div className="space-y-6 pb-24">
-        <div className="warrior-glass rounded-xl p-6 border border-warrior-gold/20">
-          <div className="text-center text-muted-foreground">Loading lounges...</div>
-        </div>
+      <div className="min-h-screen warrior-dark flex items-center justify-center p-4">
+        <Card className="warrior-glass border-warrior-ember/30 bg-warrior-ember/5 max-w-md w-full">
+          <CardHeader className="text-center">
+            <div className="mx-auto mb-4 w-16 h-16 rounded-full bg-warrior-ember/20 flex items-center justify-center">
+              <Shield className="text-warrior-ember" size={32} />
+            </div>
+            <CardTitle className="text-warrior-ember">Age Verification Required</CardTitle>
+          </CardHeader>
+          <CardContent className="text-center space-y-4">
+            <p className="text-muted-foreground">
+              The Cigar Lounge is restricted to verified adults (21+). 
+              Please verify your age to access this exclusive area.
+            </p>
+            <Button 
+              variant="warrior" 
+              onClick={() => navigate('/profile')}
+              className="w-full"
+            >
+              Verify Age in Profile
+            </Button>
+          </CardContent>
+        </Card>
       </div>
     );
   }
 
-  return (
-    <div className="space-y-6 pb-24">
-      {/* Header */}
-      <div className="warrior-glass rounded-xl p-6 border border-warrior-gold/20">
-        <div className="flex items-center justify-between">
-          <div className="flex items-center space-x-3">
-            <Cigarette className="text-warrior-gold" size={24} />
-            <div>
-              <h2 className="text-xl font-bold text-foreground">Cigar Lounge</h2>
-              <p className="text-sm text-muted-foreground">
-                {currentLounge ? `Currently in: ${currentLounge.name}` : 'Join a private club atmosphere'}
-              </p>
-            </div>
-          </div>
-          {currentLounge && (
-            <Button
-              variant="warrior-outline"
-              size="sm"
-              onClick={leaveCurrentLounge}
-            >
-              <LogOut size={16} className="mr-1" />
-              Leave
-            </Button>
-          )}
-        </div>
+  if (loading) {
+    return (
+      <div className="min-h-screen warrior-dark flex items-center justify-center">
+        <div className="text-warrior-gold text-xl">Loading lounges...</div>
       </div>
+    );
+  }
 
-      {!currentLounge ? (
-        <>
-          {/* Active Rooms */}
-          <div className="space-y-4">
-            <h3 className="text-lg font-semibold text-foreground">Active Lounges</h3>
-            {lounges.length === 0 ? (
-              <div className="warrior-glass rounded-xl p-6 border border-warrior-smoke/30 text-center">
-                <p className="text-muted-foreground mb-4">No active lounges at the moment</p>
-                <p className="text-sm text-muted-foreground">Be the first to create one!</p>
+  const currentMember = members.find(m => m.user_id === user?.id);
+
+  return (
+    <div className="min-h-screen warrior-dark p-4 pb-24">
+      <div className="max-w-6xl mx-auto space-y-6">
+        {/* Header */}
+        <div className="warrior-glass rounded-xl p-6 border border-warrior-gold/20">
+          <div className="flex items-center justify-between">
+            <div className="flex items-center space-x-3">
+              <div className="w-12 h-12 rounded-full bg-warrior-ember/20 flex items-center justify-center">
+                <span className="text-2xl">🚬</span>
               </div>
-            ) : (
-              <div className="space-y-3">
-                {lounges.map((lounge) => (
-                  <div key={lounge.id} className="warrior-glass rounded-xl p-4 border border-warrior-gold/20">
-                    <div className="flex items-center justify-between">
-                      <div>
-                        <h4 className="font-semibold text-foreground">{lounge.name}</h4>
-                        <div className="flex items-center space-x-4 mt-2">
-                          <div className="flex items-center space-x-1 text-sm text-muted-foreground">
-                            <Users size={14} />
-                            <span>{lounge.member_count}/{lounge.max_members}</span>
+              <div>
+                <h1 className="text-2xl font-bold text-foreground">Cigar Lounge</h1>
+                <p className="text-sm text-muted-foreground">
+                  {profile.age_verified ? 'Welcome to the exclusive lounge' : 'Age verification required'}
+                </p>
+              </div>
+            </div>
+            
+            {!currentLounge && (
+              <CreateLoungeModal
+                onCreateLounge={createLounge}
+              />
+            )}
+          </div>
+        </div>
+
+        {currentLounge ? (
+          <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+            {/* Left Column - Lounge Info & Tabs */}
+            <div className="lg:col-span-2 space-y-6">
+              {/* Current Lounge Info */}
+              <Card className="warrior-glass border-warrior-gold/20">
+                <CardHeader>
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <CardTitle className="text-foreground flex items-center space-x-2">
+                        <Users className="text-warrior-gold" size={20} />
+                        <span>{currentLounge.name}</span>
+                      </CardTitle>
+                      <p className="text-sm text-muted-foreground mt-1">
+                        {members.length}/{currentLounge.max_members} members
+                      </p>
+                    </div>
+                    <Button
+                      onClick={leaveCurrentLounge}
+                      variant="warrior-outline"
+                      size="sm"
+                      className="flex items-center space-x-1"
+                    >
+                      <LogOut size={14} />
+                      <span>Leave</span>
+                    </Button>
+                  </div>
+                </CardHeader>
+              </Card>
+
+              {/* Tab Navigation */}
+              <div className="flex space-x-1 bg-warrior-leather/10 p-1 rounded-lg">
+                <Button
+                  variant={activeTab === 'lounge' ? 'warrior' : 'ghost'}
+                  size="sm"
+                  onClick={() => setActiveTab('lounge')}
+                  className="flex-1"
+                >
+                  <Users size={16} className="mr-2" />
+                  Lounge
+                </Button>
+                <Button
+                  variant={activeTab === 'game' ? 'warrior' : 'ghost'}
+                  size="sm"
+                  onClick={() => setActiveTab('game')}
+                  className="flex-1"
+                >
+                  <Gamepad2 size={16} className="mr-2" />
+                  Game
+                </Button>
+                <Button
+                  variant={activeTab === 'chat' ? 'warrior' : 'ghost'}
+                  size="sm"
+                  onClick={() => setActiveTab('chat')}
+                  className="flex-1"
+                >
+                  <MessageCircle size={16} className="mr-2" />
+                  Chat
+                </Button>
+              </div>
+
+              {/* Tab Content */}
+              {activeTab === 'lounge' && (
+                <LoungeVisualizer members={members} currentUserId={user?.id} />
+              )}
+
+              {activeTab === 'game' && currentMember && (
+                <CigarGame
+                  currentStatus={currentMember.cigar_status}
+                  onStatusChange={(status, cigarId) => updateCigarStatus(status as any, cigarId)}
+                  selectedCigarId={currentMember.selected_cigar_id || undefined}
+                />
+              )}
+
+              {activeTab === 'chat' && (
+                <LoungeChat
+                  loungeId={currentLounge?.id || null}
+                  isVisible={true}
+                  onToggle={() => {}}
+                />
+              )}
+            </div>
+
+            {/* Right Column - Members List */}
+            <div className="space-y-6">
+              <Card className="warrior-glass border-warrior-gold/20">
+                <CardHeader>
+                  <CardTitle className="text-foreground">Members</CardTitle>
+                </CardHeader>
+                <CardContent className="space-y-3">
+                  {members.map((member) => (
+                    <div key={member.id} className="flex items-center justify-between p-3 bg-warrior-leather/10 rounded-lg">
+                      <div className="flex items-center space-x-3">
+                        <div className="w-8 h-8 rounded-full bg-warrior-gold/20 flex items-center justify-center text-sm font-medium text-warrior-gold">
+                          {(member.handle || 'A')[0].toUpperCase()}
+                        </div>
+                        <div>
+                          <div className="text-sm font-medium text-foreground">
+                            {member.user_id === user?.id ? 'You' : (member.handle || 'Anonymous')}
                           </div>
-                          <span className="text-sm text-muted-foreground">Host: {lounge.host_handle}</span>
+                          <div className="text-xs text-muted-foreground">
+                            {member.cigar_status}
+                          </div>
                         </div>
                       </div>
+                      <Badge variant="outline" className="text-xs">
+                        {member.cigar_status === 'selecting' && '🤔'}
+                        {member.cigar_status === 'cut' && '✂️'}
+                        {member.cigar_status === 'lit' && '🔥'}
+                        {member.cigar_status === 'smoking' && '💨'}
+                        {member.cigar_status === 'finished' && '✅'}
+                      </Badge>
+                    </div>
+                  ))}
+                </CardContent>
+              </Card>
+            </div>
+          </div>
+        ) : (
+          /* Available Lounges */
+          <div className="space-y-6">
+            <div className="flex items-center justify-between">
+              <h2 className="text-xl font-semibold text-foreground">Available Lounges</h2>
+              <Badge variant="outline" className="text-warrior-gold">
+                {lounges.length} Active
+              </Badge>
+            </div>
+
+            {lounges.length === 0 ? (
+              <Card className="warrior-glass border-warrior-gold/20">
+                <CardContent className="p-8 text-center">
+                  <div className="text-4xl mb-4">🏮</div>
+                  <h3 className="text-lg font-medium text-foreground mb-2">No Active Lounges</h3>
+                  <p className="text-muted-foreground mb-4">
+                    Be the first to create a lounge and invite fellow warriors to join!
+                  </p>
+                  <CreateLoungeModal
+                    onCreateLounge={createLounge}
+                  />
+                </CardContent>
+              </Card>
+            ) : (
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                {lounges.map((lounge) => (
+                  <Card key={lounge.id} className="warrior-glass border-warrior-gold/20 hover:border-warrior-gold/40 transition-colors">
+                    <CardHeader>
+                      <div className="flex items-center justify-between">
+                        <CardTitle className="text-foreground text-lg">{lounge.name}</CardTitle>
+                        <Badge variant="outline" className="text-xs">
+                          {lounge.member_count}/{lounge.max_members}
+                        </Badge>
+                      </div>
+                      <p className="text-sm text-muted-foreground">
+                        Host: {lounge.host_handle}
+                      </p>
+                    </CardHeader>
+                    <CardContent>
                       <Button
-                        variant="warrior-outline"
-                        size="sm"
                         onClick={() => joinLounge(lounge.id)}
+                        variant="warrior"
+                        className="w-full"
                         disabled={lounge.member_count >= lounge.max_members}
                       >
-                        {lounge.member_count >= lounge.max_members ? 'Full' : 'Join'}
+                        {lounge.member_count >= lounge.max_members ? 'Full' : 'Join Lounge'}
                       </Button>
-                    </div>
-                  </div>
+                    </CardContent>
+                  </Card>
                 ))}
               </div>
             )}
-
-            <CreateLoungeModal onCreateLounge={createLounge} />
           </div>
-        </>
-      ) : (
-        <>
-          {/* Current Lounge Members */}
-          <div className="space-y-4">
-            <h3 className="text-lg font-semibold text-foreground">Lounge Members</h3>
-            <div className="warrior-glass rounded-xl p-4 border border-warrior-gold/20">
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
-                {members.map((member) => (
-                  <div key={member.id} className="flex items-center justify-between p-2 rounded bg-warrior-leather/20">
-                    <div>
-                      <span className="font-medium text-foreground">{member.handle}</span>
-                      <div className="text-xs text-muted-foreground capitalize">
-                        {member.cigar_status === 'selecting' ? 'Choosing cigar' : 
-                         member.cigar_status === 'cut' ? 'Cigar cut' :
-                         member.cigar_status === 'lit' ? 'Cigar lit' :
-                         member.cigar_status === 'smoking' ? 'Smoking' :
-                         'Finished'}
-                      </div>
-                    </div>
-                    {member.selected_cigar_id && (
-                      <Badge variant="outline" className="text-xs">
-                        {cigars.find(c => c.id === member.selected_cigar_id)?.name}
-                      </Badge>
-                    )}
-                  </div>
-                ))}
-              </div>
-            </div>
-          </div>
-
-          {/* Cigar Selection */}
-          <div className="space-y-4">
-            <h3 className="text-lg font-semibold text-foreground">Select Your Cigar</h3>
-            <div className="space-y-3">
-              {cigars.map((cigar) => (
-                <button
-                  key={cigar.id}
-                  onClick={() => {
-                    setSelectedCigar(cigar.id);
-                    updateCigarStatus('selecting', cigar.id);
-                  }}
-                  className={`w-full p-4 rounded-xl border-2 transition-all duration-300 text-left ${
-                    selectedCigar === cigar.id
-                      ? "border-warrior-gold bg-warrior-gold/10 warrior-shadow-gold"
-                      : "border-warrior-smoke/30 bg-warrior-leather/20"
-                  }`}
-                >
-                  <div className="flex items-center justify-between">
-                    <div>
-                      <h4 className="font-semibold text-foreground">{cigar.name}</h4>
-                      <div className="flex items-center space-x-4 mt-2">
-                        <Badge variant="outline" className="text-xs">
-                          {cigar.strength}
-                        </Badge>
-                        <span className="text-xs text-muted-foreground">
-                          {cigar.length} × {cigar.ring}
-                        </span>
-                      </div>
-                    </div>
-                  </div>
-                </button>
-              ))}
-            </div>
-          </div>
-
-          {/* Cigar Actions */}
-          {selectedCigar && (
-            <div className="warrior-glass rounded-xl p-6 border border-warrior-gold/20">
-              <h3 className="text-lg font-semibold text-foreground mb-4">Cigar Actions</h3>
-              
-              <div className="space-y-4">
-                <div className="flex items-center justify-between">
-                  <span className="text-sm text-muted-foreground">Selected:</span>
-                  <span className="text-sm font-medium text-foreground">
-                    {cigars.find(c => c.id === selectedCigar)?.name}
-                  </span>
-                </div>
-
-                <div className="grid grid-cols-3 gap-3">
-                  <Button 
-                    variant="warrior-outline" 
-                    size="sm"
-                    onClick={() => handleCigarAction('cut')}
-                  >
-                    Cut
-                  </Button>
-                  <Button 
-                    variant="warrior-ember" 
-                    size="sm"
-                    onClick={() => handleCigarAction('light')}
-                  >
-                    Light
-                  </Button>
-                  <Button 
-                    variant="warrior-ghost" 
-                    size="sm"
-                    onClick={() => handleCigarAction('smoke')}
-                  >
-                    Smoke
-                  </Button>
-                </div>
-
-                <div className="flex items-center justify-between pt-4 border-t border-warrior-smoke/30">
-                  <Button 
-                    variant="ghost" 
-                    size="sm"
-                    onClick={() => setShowChat(!showChat)}
-                  >
-                    <MessageCircle size={16} />
-                    Chat
-                  </Button>
-                  <Button variant="ghost" size="sm">
-                    <Volume2 size={16} />
-                    Jazz {Math.random() > 0.5 ? 'On' : 'Off'}
-                  </Button>
-                </div>
-              </div>
-            </div>
-          )}
-        </>
-      )}
-
-      {/* Chat Component */}
-      <LoungeChat
-        loungeId={currentLounge?.id || null}
-        isVisible={showChat}
-        onToggle={() => setShowChat(!showChat)}
-      />
+        )}
+      </div>
     </div>
-  );
-};
-
-export const CigarLounge: React.FC = () => {
-  return (
-    <ProtectedRoute requireAgeVerification>
-      <CigarLoungeContent />
-    </ProtectedRoute>
   );
 };
