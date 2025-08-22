@@ -1,7 +1,7 @@
 import { ReactNode, useState } from "react";
 import { BottomNavigation } from "./BottomNavigation";
 import { WarriorProfile } from "@/components/warrior/WarriorProfile";
-import { ButcherStudio } from "@/components/studio/ButcherStudio";
+import { ButcherKitchen } from "@/components/studio/ButcherKitchen";
 import { ChefsTable } from "@/components/social/ChefsTable";
 import { CigarLounge } from "@/components/lounge/CigarLounge";
 import { EventsPage } from "@/components/events/EventsPage";
@@ -50,7 +50,7 @@ export const MainLayout: React.FC<MainLayoutProps> = ({ className }) => {
       case "profile":
         return <WarriorProfile onEditProfile={handleEditProfile} />;
       case "butcher":
-        return <ButcherStudio />;
+        return <ButcherKitchen />;
       case "table":
         return <ChefsTable />;
       case "lounge":

@@ -78,7 +78,7 @@ const Index = () => {
               <div className="group p-6 bg-warrior-leather/20 border border-warrior-gold/20 rounded-lg backdrop-blur-sm hover:bg-warrior-leather/30 transition-all duration-300">
                 <Flame className="w-8 h-8 text-warrior-ember mx-auto mb-4 group-hover:scale-110 transition-transform" />
                 <h3 className="font-cinzel font-semibold text-warrior-gold mb-2">Master Your Craft</h3>
-                <p className="text-sm text-warrior-light/70 font-cormorant">Perfect your technique in our virtual Butcher Studio</p>
+                <p className="text-sm text-warrior-light/70 font-cormorant">Perfect your technique in our virtual Butcher Kitchen</p>
               </div>
               
               <div className="group p-6 bg-warrior-leather/20 border border-warrior-gold/20 rounded-lg backdrop-blur-sm hover:bg-warrior-leather/30 transition-all duration-300">

@@ -9,7 +9,7 @@ interface BottomNavigationProps {
 
 const navItems = [
   { id: "profile", icon: User, label: "Profile", color: "text-warrior-gold" },
-  { id: "butcher", icon: ChefHat, label: "Studio", color: "text-warrior-ember" },
+  { id: "butcher", icon: ChefHat, label: "Kitchen", color: "text-warrior-ember" },
   { id: "table", icon: Utensils, label: "Table", color: "text-warrior-gold" },
   { id: "lounge", icon: Cigarette, label: "Lounge", color: "text-warrior-smoke" },
   { id: "events", icon: Calendar, label: "Events", color: "text-warrior-gold" },

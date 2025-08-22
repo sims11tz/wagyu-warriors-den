@@ -170,7 +170,7 @@ export const WarriorProfile: React.FC<WarriorProfileProps> = ({ onEditProfile })
       {/* Action Buttons */}
       <div className="flex flex-col gap-3">
         <Button variant="warrior" size="lg" className="w-full">
-          Enter Butcher Studio
+          Enter Butcher Kitchen
         </Button>
         <Button variant="warrior-outline" size="lg" className="w-full">
           Join Cigar Lounge

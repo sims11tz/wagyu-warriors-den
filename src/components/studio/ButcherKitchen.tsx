@@ -12,7 +12,7 @@ const primalCuts = [
   { id: "picanha", name: "Picanha", grade: "Select", color: "warrior-leather" },
 ];
 
-export const ButcherStudio: React.FC = () => {
+export const ButcherKitchen: React.FC = () => {
   const [selectedCut, setSelectedCut] = useState<string | null>(null);
   const [isSlicing, setIsSlicing] = useState(false);
   const [sliceScore, setSliceScore] = useState(0);
@@ -35,7 +35,7 @@ export const ButcherStudio: React.FC = () => {
         <div className="flex items-center space-x-3 mb-4">
           <ChefHat className="text-warrior-gold" size={24} />
           <div>
-            <h2 className="text-xl font-bold text-foreground">Butcher Studio</h2>
+            <h2 className="text-xl font-bold text-foreground">Butcher Kitchen</h2>
             <p className="text-sm text-muted-foreground">Master the art of the blade</p>
           </div>
         </div>
