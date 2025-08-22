@@ -86,6 +86,27 @@ export const useCigarLounges = () => {
     if (!user) return;
 
     try {
+      // Check if user is already a member of this lounge
+      const { data: existingMember } = await supabase
+        .from('lounge_members')
+        .select('id')
+        .eq('lounge_id', loungeId)
+        .eq('user_id', user.id)
+        .maybeSingle();
+
+      if (existingMember) {
+        // User is already a member, just set as current lounge
+        const lounge = lounges.find(l => l.id === loungeId);
+        if (lounge) {
+          setCurrentLounge(lounge);
+          toast({
+            title: "Already in Lounge",
+            description: `You're already in ${lounge.name}!`
+          });
+        }
+        return;
+      }
+
       // First, leave any current lounge
       await leaveCurrentLounge();
 
@@ -98,7 +119,21 @@ export const useCigarLounges = () => {
           cigar_status: 'selecting'
         });
 
-      if (error) throw error;
+      if (error) {
+        // Handle duplicate key error gracefully
+        if (error.code === '23505') {
+          const lounge = lounges.find(l => l.id === loungeId);
+          if (lounge) {
+            setCurrentLounge(lounge);
+            toast({
+              title: "Already in Lounge",
+              description: `You're already in ${lounge.name}!`
+            });
+          }
+          return;
+        }
+        throw error;
+      }
 
       // Set current lounge
       const lounge = lounges.find(l => l.id === loungeId);
@@ -158,13 +193,20 @@ export const useCigarLounges = () => {
 
       if (error) throw error;
 
-      // Auto-join the created lounge
-      await joinLounge(data.id);
+      // Set as current lounge (trigger should have added host as member)
+      setCurrentLounge({
+        ...data,
+        member_count: 1,
+        host_handle: 'You'
+      });
 
       toast({
         title: "Lounge Created",
         description: `${name} is now open for smoking!`
       });
+
+      // Refresh lounges to get updated data
+      fetchLounges();
     } catch (error: any) {
       console.error('Error creating lounge:', error);
       toast({
@@ -240,9 +282,9 @@ export const useCigarLounges = () => {
         .from('lounge_members')
         .select('*')
         .eq('user_id', user.id)
-        .single();
+        .maybeSingle();
 
-      if (error && error.code !== 'PGRST116') throw error;
+      if (error) throw error;
 
       if (memberData) {
         // Get the lounge details
@@ -250,7 +292,7 @@ export const useCigarLounges = () => {
           .from('cigar_lounges')
           .select('*')
           .eq('id', memberData.lounge_id)
-          .single();
+          .maybeSingle();
 
         if (loungeData) {
           setCurrentLounge({

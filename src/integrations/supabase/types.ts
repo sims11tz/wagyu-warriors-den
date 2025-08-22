@@ -278,6 +278,10 @@ export type Database = {
         Args: Record<PropertyKey, never>
         Returns: undefined
       }
+      is_lounge_member: {
+        Args: { p_lounge_id: string; p_user_id?: string }
+        Returns: boolean
+      }
       update_member_last_seen: {
         Args: { p_lounge_id: string }
         Returns: undefined
