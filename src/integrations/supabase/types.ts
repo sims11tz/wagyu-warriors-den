@@ -95,6 +95,7 @@ export type Database = {
           handle: string | null
           id: string
           marbling_points: number | null
+          public_profile: boolean | null
           sear_score: number | null
           smoke_rings: number | null
           tier: string | null
@@ -110,6 +111,7 @@ export type Database = {
           handle?: string | null
           id?: string
           marbling_points?: number | null
+          public_profile?: boolean | null
           sear_score?: number | null
           smoke_rings?: number | null
           tier?: string | null
@@ -125,6 +127,7 @@ export type Database = {
           handle?: string | null
           id?: string
           marbling_points?: number | null
+          public_profile?: boolean | null
           sear_score?: number | null
           smoke_rings?: number | null
           tier?: string | null
@@ -138,7 +141,10 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
-      [_ in never]: never
+      verify_user_age: {
+        Args: { birth_date: string }
+        Returns: boolean
+      }
     }
     Enums: {
       [_ in never]: never
