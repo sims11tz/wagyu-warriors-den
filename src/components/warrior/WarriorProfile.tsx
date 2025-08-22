@@ -1,27 +1,57 @@
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { StatCard } from "./StatCard";
-import { Flame, Target, Coffee, Edit, Trophy, Star } from "lucide-react";
-import warriorAvatar from "@/assets/warrior-avatar.jpg";
+import { Flame, Target, Cigarette, Edit, Trophy, Star } from "lucide-react";
+import { useProfile } from "@/hooks/useProfile";
+import { Skeleton } from "@/components/ui/skeleton";
 
 interface WarriorProfileProps {
   onEditProfile: () => void;
 }
 
 export const WarriorProfile: React.FC<WarriorProfileProps> = ({ onEditProfile }) => {
-  // Mock user data - in real app this would come from props/context
-  const warriorData = {
-    handle: "SteakSensei47",
-    tier: "Founding Warrior",
-    bio: "Master of the blade, seeker of perfect marbling. Honor through beef.",
-    stats: {
-      marblingPoints: 2847,
-      searScore: 1923,
-      smokeRings: 156,
-    },
-    badges: ["First Cut", "Perfect Sear", "Master Smoker"],
-    favoriteCuts: ["Ribeye A5", "Wagyu Tenderloin", "Dry-Aged Strip"],
-  };
+  const { profile, loading, error } = useProfile();
+
+  if (loading) {
+    return (
+      <div className="space-y-6 pb-24">
+        {/* Loading skeleton */}
+        <div className="warrior-gradient-leather rounded-2xl p-6">
+          <div className="flex items-start space-x-4">
+            <Skeleton className="w-20 h-20 rounded-full" />
+            <div className="flex-1 space-y-2">
+              <Skeleton className="h-6 w-48" />
+              <Skeleton className="h-4 w-32" />
+              <Skeleton className="h-12 w-full" />
+            </div>
+          </div>
+        </div>
+        <div className="grid grid-cols-3 gap-4">
+          <Skeleton className="h-24 rounded-xl" />
+          <Skeleton className="h-24 rounded-xl" />
+          <Skeleton className="h-24 rounded-xl" />
+        </div>
+      </div>
+    );
+  }
+
+  if (error || !profile) {
+    return (
+      <div className="space-y-6 pb-24">
+        <div className="warrior-glass rounded-xl p-6 border border-warrior-gold/20 text-center">
+          <p className="text-warrior-light">Failed to load profile. Please try again.</p>
+          <Button variant="warrior" onClick={() => window.location.reload()} className="mt-4">
+            Reload
+          </Button>
+        </div>
+      </div>
+    );
+  }
+
+  const defaultHandle = profile.handle || 'New Warrior';
+  const defaultBio = profile.bio || 'A fresh warrior ready to master the art of beef.';
+  const tierName = profile.tier === 'guest' ? 'New Warrior' : 
+                  profile.tier === 'member' ? 'Active Warrior' : 'Founding Warrior';
 
   return (
     <div className="space-y-6 pb-24">
@@ -30,11 +60,11 @@ export const WarriorProfile: React.FC<WarriorProfileProps> = ({ onEditProfile })
         <div className="absolute inset-0 bg-gradient-to-r from-warrior-gold/10 to-transparent" />
         <div className="relative flex items-start space-x-4">
           <div className="relative">
-            <img
-              src={warriorAvatar}
-              alt="Warrior Avatar"
-              className="w-20 h-20 rounded-full object-cover border-3 border-warrior-gold warrior-shadow-gold"
-            />
+            <div className="w-20 h-20 rounded-full bg-warrior-gold/20 border-3 border-warrior-gold warrior-shadow-gold flex items-center justify-center">
+              <span className="text-2xl font-bold text-warrior-gold">
+                {defaultHandle.charAt(0).toUpperCase()}
+              </span>
+            </div>
             <div className="absolute -bottom-1 -right-1 p-1 bg-warrior-gold rounded-full">
               <Star size={12} className="text-warrior-dark" fill="currentColor" />
             </div>
@@ -43,10 +73,10 @@ export const WarriorProfile: React.FC<WarriorProfileProps> = ({ onEditProfile })
           <div className="flex-1">
             <div className="flex items-center justify-between">
               <div>
-                <h1 className="text-xl font-bold text-foreground">{warriorData.handle}</h1>
+                <h1 className="text-xl font-bold text-foreground">{defaultHandle}</h1>
                 <Badge variant="outline" className="border-warrior-gold text-warrior-gold bg-warrior-gold/10 mt-1">
                   <Trophy size={12} className="mr-1" />
-                  {warriorData.tier}
+                  {tierName}
                 </Badge>
               </div>
               <Button variant="warrior-ghost" size="sm" onClick={onEditProfile}>
@@ -55,7 +85,7 @@ export const WarriorProfile: React.FC<WarriorProfileProps> = ({ onEditProfile })
             </div>
             
             <p className="text-sm text-muted-foreground mt-3 leading-relaxed">
-              {warriorData.bio}
+              {defaultBio}
             </p>
           </div>
         </div>
@@ -65,20 +95,20 @@ export const WarriorProfile: React.FC<WarriorProfileProps> = ({ onEditProfile })
       <div className="grid grid-cols-3 gap-4">
         <StatCard
           title="Marbling"
-          value={warriorData.stats.marblingPoints}
+          value={profile.marbling_points || 0}
           icon={Target}
           color="gold"
         />
         <StatCard
           title="Sear Score"
-          value={warriorData.stats.searScore}
+          value={profile.sear_score || 0}
           icon={Flame}
           color="ember"
         />
         <StatCard
           title="Smoke Rings"
-          value={warriorData.stats.smokeRings}
-          icon={Coffee}
+          value={profile.smoke_rings || 0}
+          icon={Cigarette}
           color="smoke"
         />
       </div>
@@ -87,7 +117,9 @@ export const WarriorProfile: React.FC<WarriorProfileProps> = ({ onEditProfile })
       <div className="warrior-glass rounded-xl p-6 border border-warrior-gold/20">
         <h3 className="text-lg font-semibold text-foreground mb-4">Signature Cuts</h3>
         <div className="flex flex-wrap gap-2">
-          {warriorData.favoriteCuts.map((cut, index) => (
+          {profile.favorites && typeof profile.favorites === 'object' && 
+           Array.isArray((profile.favorites as any).cuts) ? 
+           (profile.favorites as any).cuts.map((cut: string, index: number) => (
             <Badge
               key={index}
               variant="outline"
@@ -95,7 +127,9 @@ export const WarriorProfile: React.FC<WarriorProfileProps> = ({ onEditProfile })
             >
               {cut}
             </Badge>
-          ))}
+          )) : (
+            <p className="text-sm text-muted-foreground">No signature cuts selected yet.</p>
+          )}
         </div>
       </div>
 
@@ -103,7 +137,9 @@ export const WarriorProfile: React.FC<WarriorProfileProps> = ({ onEditProfile })
       <div className="warrior-glass rounded-xl p-6 border border-warrior-gold/20">
         <h3 className="text-lg font-semibold text-foreground mb-4">Battle Honors</h3>
         <div className="grid grid-cols-2 gap-3">
-          {warriorData.badges.map((badge, index) => (
+          {profile.favorites && typeof profile.favorites === 'object' && 
+           Array.isArray((profile.favorites as any).badges) ? 
+           (profile.favorites as any).badges.map((badge: string, index: number) => (
             <div
               key={index}
               className="flex items-center p-3 rounded-lg warrior-gradient-smoke border border-warrior-gold/30"
@@ -113,7 +149,11 @@ export const WarriorProfile: React.FC<WarriorProfileProps> = ({ onEditProfile })
               </div>
               <span className="text-sm font-medium text-foreground">{badge}</span>
             </div>
-          ))}
+          )) : (
+            <div className="col-span-2">
+              <p className="text-sm text-muted-foreground text-center">No battle honors earned yet.</p>
+            </div>
+          )}
         </div>
       </div>
 

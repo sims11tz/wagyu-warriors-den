@@ -5,6 +5,7 @@ import { ButcherStudio } from "@/components/studio/ButcherStudio";
 import { ChefsTable } from "@/components/social/ChefsTable";
 import { CigarLounge } from "@/components/lounge/CigarLounge";
 import { EventsPage } from "@/components/events/EventsPage";
+import { EditProfileModal } from "@/components/profile/EditProfileModal";
 import { cn } from "@/lib/utils";
 import { useAuth } from "@/contexts/AuthContext";
 import { Button } from "@/components/ui/button";
@@ -18,6 +19,7 @@ interface MainLayoutProps {
 
 export const MainLayout: React.FC<MainLayoutProps> = ({ className }) => {
   const [activeTab, setActiveTab] = useState("profile");
+  const [editProfileOpen, setEditProfileOpen] = useState(false);
   const { signOut } = useAuth();
   const navigate = useNavigate();
   const { toast } = useToast();
@@ -40,8 +42,7 @@ export const MainLayout: React.FC<MainLayoutProps> = ({ className }) => {
   };
 
   const handleEditProfile = () => {
-    // Profile editing functionality would be implemented here
-    // For now, this is a placeholder for the edit profile action
+    setEditProfileOpen(true);
   };
 
   const renderContent = () => {
@@ -106,6 +107,12 @@ export const MainLayout: React.FC<MainLayoutProps> = ({ className }) => {
 
       {/* Bottom Navigation */}
       <BottomNavigation activeTab={activeTab} onTabChange={setActiveTab} />
+      
+      {/* Edit Profile Modal */}
+      <EditProfileModal 
+        open={editProfileOpen} 
+        onClose={() => setEditProfileOpen(false)} 
+      />
     </div>
   );
 };

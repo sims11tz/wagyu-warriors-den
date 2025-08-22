@@ -120,7 +120,7 @@ const Auth = () => {
     }
     
     setLoading(true);
-    const { error } = await signUp(cleanEmail, cleanPassword, cleanHandle || undefined);
+    const { error } = await signUp(cleanEmail, cleanPassword, cleanHandle || undefined, ageVerified);
     setLoading(false);
     
     if (error) {
