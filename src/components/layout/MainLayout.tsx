@@ -48,7 +48,7 @@ export const MainLayout: React.FC<MainLayoutProps> = ({ className }) => {
   const renderContent = () => {
     switch (activeTab) {
       case "profile":
-        return <WarriorProfile onEditProfile={handleEditProfile} />;
+        return <WarriorProfile onEditProfile={handleEditProfile} onNavigateToTab={setActiveTab} />;
       case "butcher":
         return <ButcherKitchen />;
       case "table":
@@ -58,7 +58,7 @@ export const MainLayout: React.FC<MainLayoutProps> = ({ className }) => {
       case "events":
         return <EventsPage />;
       default:
-        return <WarriorProfile onEditProfile={handleEditProfile} />;
+        return <WarriorProfile onEditProfile={handleEditProfile} onNavigateToTab={setActiveTab} />;
     }
   };
 

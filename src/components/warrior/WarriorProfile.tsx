@@ -7,9 +7,10 @@ import { Skeleton } from "@/components/ui/skeleton";
 
 interface WarriorProfileProps {
   onEditProfile: () => void;
+  onNavigateToTab: (tab: string) => void;
 }
 
-export const WarriorProfile: React.FC<WarriorProfileProps> = ({ onEditProfile }) => {
+export const WarriorProfile: React.FC<WarriorProfileProps> = ({ onEditProfile, onNavigateToTab }) => {
   const { profile, loading, error, avatarUrl } = useProfile();
 
   if (loading) {
@@ -169,10 +170,10 @@ export const WarriorProfile: React.FC<WarriorProfileProps> = ({ onEditProfile })
 
       {/* Action Buttons */}
       <div className="flex flex-col gap-3">
-        <Button variant="warrior" size="lg" className="w-full">
+        <Button variant="warrior" size="lg" className="w-full" onClick={() => onNavigateToTab("butcher")}>
           Enter Butcher Kitchen
         </Button>
-        <Button variant="warrior-outline" size="lg" className="w-full">
+        <Button variant="warrior-outline" size="lg" className="w-full" onClick={() => onNavigateToTab("lounge")}>
           Join Cigar Lounge
         </Button>
       </div>
