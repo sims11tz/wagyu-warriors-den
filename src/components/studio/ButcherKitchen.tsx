@@ -2,7 +2,7 @@ import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { ChefHat, Play, RotateCcw, Save } from "lucide-react";
-import butcherKnife from "@/assets/butcher-knife.jpg";
+import yakuzaKitchenOven from "@/assets/yakuza-kitchen-oven.jpg";
 import wagyuHero from "@/assets/wagyu-hero.jpg";
 import { SlicingGame } from "./SlicingGame";
 import { SearingGame } from "./SearingGame";
@@ -142,8 +142,8 @@ export const ButcherKitchen: React.FC = () => {
         
         <div className="flex items-center justify-center mb-6">
           <img
-            src={butcherKnife}
-            alt="Premium Knife"
+            src={yakuzaKitchenOven}
+            alt="Yakuza Kitchen Oven"
             className="w-32 h-24 object-cover rounded-lg warrior-shadow"
           />
         </div>
@@ -157,7 +157,7 @@ export const ButcherKitchen: React.FC = () => {
             className="w-full"
           >
             <Play size={16} />
-            Master the Cut
+            Lets Cook this Meat
           </Button>
           
           <Button
