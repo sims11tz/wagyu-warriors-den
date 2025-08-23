@@ -71,6 +71,42 @@ export type Database = {
         }
         Relationships: []
       }
+      drinks: {
+        Row: {
+          alcohol_content: number | null
+          category: string
+          created_at: string
+          description: string | null
+          difficulty: string
+          flavor_profile: string | null
+          id: number
+          name: string
+          price: number | null
+        }
+        Insert: {
+          alcohol_content?: number | null
+          category?: string
+          created_at?: string
+          description?: string | null
+          difficulty?: string
+          flavor_profile?: string | null
+          id?: number
+          name: string
+          price?: number | null
+        }
+        Update: {
+          alcohol_content?: number | null
+          category?: string
+          created_at?: string
+          description?: string | null
+          difficulty?: string
+          flavor_profile?: string | null
+          id?: number
+          name?: string
+          price?: number | null
+        }
+        Relationships: []
+      }
       event_rsvps: {
         Row: {
           created_at: string
@@ -180,6 +216,9 @@ export type Database = {
       lounge_members: {
         Row: {
           cigar_status: string | null
+          drink_order_id: number | null
+          drink_progress: number | null
+          drink_status: string | null
           id: string
           joined_at: string
           last_seen: string
@@ -189,6 +228,9 @@ export type Database = {
         }
         Insert: {
           cigar_status?: string | null
+          drink_order_id?: number | null
+          drink_progress?: number | null
+          drink_status?: string | null
           id?: string
           joined_at?: string
           last_seen?: string
@@ -198,6 +240,9 @@ export type Database = {
         }
         Update: {
           cigar_status?: string | null
+          drink_order_id?: number | null
+          drink_progress?: number | null
+          drink_status?: string | null
           id?: string
           joined_at?: string
           last_seen?: string
@@ -206,6 +251,13 @@ export type Database = {
           user_id?: string
         }
         Relationships: [
+          {
+            foreignKeyName: "lounge_members_drink_order_id_fkey"
+            columns: ["drink_order_id"]
+            isOneToOne: false
+            referencedRelation: "drinks"
+            referencedColumns: ["id"]
+          },
           {
             foreignKeyName: "lounge_members_lounge_id_fkey"
             columns: ["lounge_id"]

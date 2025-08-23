@@ -10,7 +10,9 @@ import { CreateLoungeModal } from "./CreateLoungeModal";
 import { LoungeChat } from "./LoungeChat";
 import { LoungeVisualizer } from "./LoungeVisualizer";
 import { CigarGame } from "@/components/studio/CigarGame";
-import { Shield, Users, MessageCircle, Plus, LogOut, Gamepad2 } from "lucide-react";
+import { YakuzaRobot } from "./YakuzaRobot";
+import { DrinkingGame } from "./DrinkingGame";
+import { Shield, Users, MessageCircle, Plus, LogOut, Gamepad2, Bot } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 
 export const CigarLounge = () => {
@@ -25,11 +27,13 @@ export const CigarLounge = () => {
     joinLounge, 
     leaveCurrentLounge, 
     createLounge,
-    updateCigarStatus
+    updateCigarStatus,
+    orderDrink,
+    updateDrinkProgress
   } = useCigarLounges();
   
   const { messages, sendMessage } = useLoungeChat(currentLounge?.id);
-  const [activeTab, setActiveTab] = useState<'lounge' | 'game' | 'chat'>('lounge');
+  const [activeTab, setActiveTab] = useState<'lounge' | 'game' | 'chat' | 'robot'>('lounge');
 
   // Check if user needs age verification
   if (!profile?.age_verified) {
@@ -155,6 +159,15 @@ export const CigarLounge = () => {
                   <MessageCircle size={16} className="mr-2" />
                   Chat
                 </Button>
+                <Button
+                  variant={activeTab === 'robot' ? 'warrior' : 'ghost'}
+                  size="sm"
+                  onClick={() => setActiveTab('robot')}
+                  className="flex-1"
+                >
+                  <Bot size={16} className="mr-2" />
+                  Bar
+                </Button>
               </div>
 
               {/* Tab Content */}
@@ -176,6 +189,23 @@ export const CigarLounge = () => {
                   isVisible={true}
                   onToggle={() => {}}
                 />
+              )}
+
+              {activeTab === 'robot' && (
+                <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                  <YakuzaRobot 
+                    onOrderDrink={orderDrink}
+                    isVisible={true}
+                  />
+                  <DrinkingGame
+                    drinkName={currentMember?.drink_order_id ? `Drink #${currentMember.drink_order_id}` : undefined}
+                    drinkDifficulty="medium"
+                    drinkProgress={currentMember?.drink_progress || 0}
+                    onProgressUpdate={updateDrinkProgress}
+                    onFinished={() => updateDrinkProgress(100)}
+                    isActive={!!currentMember?.drink_order_id}
+                  />
+                </div>
               )}
             </div>
 

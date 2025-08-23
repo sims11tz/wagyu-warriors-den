@@ -20,6 +20,9 @@ export interface LoungeMember {
   user_id: string;
   selected_cigar_id?: number;
   cigar_status: 'selecting' | 'cut' | 'lit' | 'smoking' | 'finished';
+  drink_order_id?: number | null;
+  drink_status: string;
+  drink_progress: number;
   joined_at: string;
   last_seen: string;
   handle?: string;
@@ -238,6 +241,51 @@ export const useCigarLounges = () => {
     }
   };
 
+  // Order drink
+  const orderDrink = async (drinkId: number) => {
+    if (!user || !currentLounge) return;
+
+    try {
+      const { error } = await supabase
+        .from('lounge_members')
+        .update({ 
+          drink_order_id: drinkId,
+          drink_status: 'ordered',
+          drink_progress: 0,
+          last_seen: new Date().toISOString()
+        })
+        .eq('lounge_id', currentLounge.id)
+        .eq('user_id', user.id);
+
+      if (error) throw error;
+    } catch (error) {
+      console.error('Error ordering drink:', error);
+    }
+  };
+
+  // Update drink progress
+  const updateDrinkProgress = async (progress: number) => {
+    if (!user || !currentLounge) return;
+
+    try {
+      const status = progress >= 100 ? 'finished' : 'drinking';
+      
+      const { error } = await supabase
+        .from('lounge_members')
+        .update({ 
+          drink_progress: progress,
+          drink_status: status,
+          last_seen: new Date().toISOString()
+        })
+        .eq('lounge_id', currentLounge.id)
+        .eq('user_id', user.id);
+
+      if (error) throw error;
+    } catch (error) {
+      console.error('Error updating drink progress:', error);
+    }
+  };
+
   // Fetch current lounge members
   const fetchMembers = async () => {
     if (!currentLounge) return;
@@ -373,6 +421,8 @@ export const useCigarLounges = () => {
     leaveCurrentLounge,
     createLounge,
     updateCigarStatus,
+    orderDrink,
+    updateDrinkProgress,
     fetchLounges
   };
 };

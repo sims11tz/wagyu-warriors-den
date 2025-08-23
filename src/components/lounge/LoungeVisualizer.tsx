@@ -99,6 +99,31 @@ export const LoungeVisualizer = ({ members, currentUserId }: LoungeVisualizerPro
             </div>
           </div>
 
+          {/* Yakuza Robot Bartender */}
+          <div 
+            className="absolute transform -translate-x-1/2 -translate-y-1/2"
+            style={{ left: '85%', top: '50%' }}
+          >
+            <div className="relative">
+              <div className="w-12 h-12 rounded-full border-2 border-warrior-ember bg-warrior-ember/20 flex items-center justify-center">
+                <div className="text-lg">🤖</div>
+              </div>
+              <div className="absolute -top-1 -right-1">
+                <div className="w-4 h-4 rounded-full bg-green-500 border border-background flex items-center justify-center">
+                  <div className="w-2 h-2 rounded-full bg-white animate-pulse"></div>
+                </div>
+              </div>
+              <div className="absolute top-full mt-1 left-1/2 transform -translate-x-1/2 min-w-max">
+                <div className="text-center">
+                  <div className="text-xs font-medium text-warrior-ember">Bartender</div>
+                  <Badge variant="outline" className="text-xs mt-1 bg-warrior-ember/10 text-warrior-ember">
+                    Online
+                  </Badge>
+                </div>
+              </div>
+            </div>
+          </div>
+
           {/* Member Seats */}
           {members.slice(0, 6).map((member, index) => {
             const position = seatPositions[index];
