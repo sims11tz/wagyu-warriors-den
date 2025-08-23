@@ -416,6 +416,10 @@ export type Database = {
         Args: { p_lounge_id: string }
         Returns: undefined
       }
+      update_smoke_rings: {
+        Args: { p_rings?: number; p_user_id: string }
+        Returns: undefined
+      }
       verify_user_age: {
         Args: { birth_date: string }
         Returns: boolean

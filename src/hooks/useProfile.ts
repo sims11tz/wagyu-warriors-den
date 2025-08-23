@@ -149,6 +149,10 @@ export const useProfile = () => {
     }
   };
 
+  const refreshProfile = () => {
+    setRefreshKey(prev => prev + 1);
+  };
+
   return {
     profile,
     loading,
@@ -157,5 +161,6 @@ export const useProfile = () => {
     updateProfile,
     getAvatarUrl,
     fetchAvatarUrl, // Expose function to manually fetch avatar URL
+    refreshProfile, // Function to refresh profile data
   };
 };

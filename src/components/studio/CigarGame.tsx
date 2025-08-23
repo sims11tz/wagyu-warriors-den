@@ -4,6 +4,8 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Progress } from "@/components/ui/progress";
 import { Badge } from "@/components/ui/badge";
 import { useToast } from "@/components/ui/use-toast";
+import { useAuth } from "@/contexts/AuthContext";
+import { supabase } from "@/integrations/supabase/client";
 import { Flame, Scissors, Target, Wind } from "lucide-react";
 
 interface CigarOption {
@@ -45,12 +47,13 @@ interface CigarGameProps {
 }
 
 export const CigarGame = ({ currentStatus, onStatusChange, selectedCigarId }: CigarGameProps) => {
+  const { user } = useAuth();
+  const { toast } = useToast();
   const [gameState, setGameState] = useState<'idle' | 'playing' | 'success' | 'fail'>('idle');
   const [progress, setProgress] = useState(0);
   const [cutPosition, setCutPosition] = useState(50);
   const [lightingProgress, setLightingProgress] = useState(0);
   const [puffCount, setPuffCount] = useState(0);
-  const { toast } = useToast();
 
   const selectedCigar = cigarOptions.find(c => c.id === selectedCigarId);
 
@@ -132,14 +135,36 @@ export const CigarGame = ({ currentStatus, onStatusChange, selectedCigarId }: Ci
   };
 
   // Smoking Game
-  const handlePuff = () => {
-    setPuffCount(prev => prev + 1);
-    if (puffCount >= 9) {
+  const handlePuff = async () => {
+    const newPuffCount = puffCount + 1;
+    setPuffCount(newPuffCount);
+    
+    if (newPuffCount >= 10) {
       onStatusChange('finished');
-      toast({
-        title: "Cigar Finished!",
-        description: "What a wonderful smoking experience!"
-      });
+      
+      // Award smoke rings when cigar is finished
+      if (user) {
+        try {
+          const ringsEarned = selectedCigar?.difficulty === 'Hard' ? 3 : 
+                            selectedCigar?.difficulty === 'Medium' ? 2 : 1;
+          
+          await supabase.rpc('update_smoke_rings', { 
+            p_user_id: user.id, 
+            p_rings: ringsEarned 
+          });
+          
+          toast({
+            title: "Cigar Finished!",
+            description: `What a wonderful smoking experience! You earned ${ringsEarned} smoke rings! 💨`
+          });
+        } catch (error) {
+          console.error('Error updating smoke rings:', error);
+          toast({
+            title: "Cigar Finished!",
+            description: "What a wonderful smoking experience!"
+          });
+        }
+      }
     }
   };
 
