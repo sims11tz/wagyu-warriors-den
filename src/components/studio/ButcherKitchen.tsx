@@ -6,6 +6,9 @@ import yakuzaKitchenOven from "@/assets/yakuza-kitchen-oven.jpg";
 import wagyuHero from "@/assets/wagyu-hero.jpg";
 import { SlicingGame } from "./SlicingGame";
 import { SearingGame } from "./SearingGame";
+import { supabase } from "@/integrations/supabase/client";
+import { useAuth } from "@/contexts/AuthContext";
+import { toast } from "sonner";
 
 const primalCuts = [
   { id: "ribeye", name: "Ribeye A5", grade: "Prime", color: "warrior-ember" },
@@ -15,6 +18,7 @@ const primalCuts = [
 ];
 
 export const ButcherKitchen: React.FC = () => {
+  const { user } = useAuth();
   const [selectedCut, setSelectedCut] = useState<string | null>(null);
   const [sliceScore, setSliceScore] = useState(0);
   const [showSearingGame, setShowSearingGame] = useState(false);
@@ -44,6 +48,10 @@ export const ButcherKitchen: React.FC = () => {
     setSliceScore(score);
     setTotalCuts(cuts);
     setShowSlicingGame(false);
+    // Save the complete cooking session when both games are done
+    setTimeout(() => {
+      saveCookingSession();
+    }, 100);
   };
 
   const handleCloseGame = () => {
@@ -58,6 +66,35 @@ export const ButcherKitchen: React.FC = () => {
     setSearingScore(0);
     setSearingTechnique('');
     setSearingCompleted(false);
+  };
+
+  const saveCookingSession = async () => {
+    if (!user || !selectedCut || !searingScore || !sliceScore) return;
+
+    try {
+      const cutData = primalCuts.find(c => c.id === selectedCut);
+      const totalScore = searingScore + sliceScore;
+
+      const { error } = await supabase
+        .from('cooking_sessions')
+        .insert({
+          user_id: user.id,
+          cut_type: selectedCut,
+          cut_name: cutData?.name || '',
+          searing_score: searingScore,
+          searing_technique: searingTechnique,
+          slicing_score: sliceScore,
+          total_cuts: totalCuts,
+          total_score: totalScore
+        });
+
+      if (error) throw error;
+
+      toast.success("Cooking session saved! Your stats have been updated.");
+    } catch (error: any) {
+      console.error('Error saving cooking session:', error);
+      toast.error("Failed to save cooking session");
+    }
   };
 
   const isGameComplete = sliceScore > 0 && searingScore > 0;
@@ -221,7 +258,11 @@ export const ButcherKitchen: React.FC = () => {
           <Button
             variant="warrior"
             size="lg"
-            onClick={resetAllGames}
+            onClick={() => {
+              resetAllGames();
+              // Scroll to top for better UX
+              window.scrollTo({ top: 0, behavior: 'smooth' });
+            }}
             className="w-full"
           >
             <Play size={16} />

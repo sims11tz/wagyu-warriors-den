@@ -71,6 +71,45 @@ export type Database = {
         }
         Relationships: []
       }
+      cooking_sessions: {
+        Row: {
+          created_at: string
+          cut_name: string
+          cut_type: string
+          id: string
+          searing_score: number
+          searing_technique: string | null
+          slicing_score: number
+          total_cuts: number
+          total_score: number
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          cut_name: string
+          cut_type: string
+          id?: string
+          searing_score?: number
+          searing_technique?: string | null
+          slicing_score?: number
+          total_cuts?: number
+          total_score?: number
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          cut_name?: string
+          cut_type?: string
+          id?: string
+          searing_score?: number
+          searing_technique?: string | null
+          slicing_score?: number
+          total_cuts?: number
+          total_score?: number
+          user_id?: string
+        }
+        Relationships: []
+      }
       drinks: {
         Row: {
           alcohol_content: number | null
