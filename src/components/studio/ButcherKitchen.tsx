@@ -51,6 +51,17 @@ export const ButcherKitchen: React.FC = () => {
     setShowSearingGame(false);
   };
 
+  const resetAllGames = () => {
+    setSelectedCut(null);
+    setSliceScore(0);
+    setTotalCuts(0);
+    setSearingScore(0);
+    setSearingTechnique('');
+    setSearingCompleted(false);
+  };
+
+  const isGameComplete = sliceScore > 0 && searingScore > 0;
+
   return (
     <div className="space-y-6 pb-24">
       {/* Header */}
@@ -84,111 +95,140 @@ export const ButcherKitchen: React.FC = () => {
         )}
       </div>
 
-      {/* Primal Selection */}
-      <div className="space-y-4">
-        <h3 className="text-lg font-semibold text-foreground">Select Your Cut</h3>
-        <div className="grid grid-cols-2 gap-3">
-          {primalCuts.map((cut) => (
-            <button
-              key={cut.id}
-              onClick={() => setSelectedCut(cut.id)}
-              className={`p-4 rounded-xl border-2 transition-all duration-300 ${
-                selectedCut === cut.id
-                  ? "border-warrior-gold bg-warrior-gold/10 warrior-shadow-gold"
-                  : "border-warrior-smoke/30 bg-warrior-leather/20"
-              }`}
-            >
-              <div className="text-left">
-                <h4 className="font-semibold text-foreground">{cut.name}</h4>
-                <Badge 
-                  variant="outline" 
-                  className={`mt-2 text-xs border-${cut.color}/50 text-${cut.color}`}
+      {!isGameComplete && (
+        <>
+          {/* Primal Selection */}
+          <div className="space-y-4">
+            <h3 className="text-lg font-semibold text-foreground">Select Your Cut</h3>
+            <div className="grid grid-cols-2 gap-3">
+              {primalCuts.map((cut) => (
+                <button
+                  key={cut.id}
+                  onClick={() => setSelectedCut(cut.id)}
+                  className={`p-4 rounded-xl border-2 transition-all duration-300 ${
+                    selectedCut === cut.id
+                      ? "border-warrior-gold bg-warrior-gold/10 warrior-shadow-gold"
+                      : "border-warrior-smoke/30 bg-warrior-leather/20"
+                  }`}
                 >
-                  {cut.grade}
-                </Badge>
-              </div>
-            </button>
-          ))}
-        </div>
-      </div>
-
-      {/* Cutting Board */}
-      <div className="warrior-glass rounded-xl p-6 border border-warrior-gold/20">
-        <div className="relative">
-          <img
-            src={wagyuHero}
-            alt="Wagyu Cutting Board"
-            className="w-full h-48 object-cover rounded-lg"
-          />
-          
-          {selectedCut && (
-            <div className="absolute inset-0 flex items-center justify-center bg-black/50 rounded-lg">
-              <div className="text-center">
-                <div className="w-16 h-16 warrior-gradient-gold rounded-full flex items-center justify-center mb-4 mx-auto">
-                  <ChefHat size={24} className="text-warrior-dark" />
-                </div>
-                <p className="text-white font-medium">
-                  {primalCuts.find(c => c.id === selectedCut)?.name} Ready
-                </p>
-              </div>
+                  <div className="text-left">
+                    <h4 className="font-semibold text-foreground">{cut.name}</h4>
+                    <Badge 
+                      variant="outline" 
+                      className={`mt-2 text-xs border-${cut.color}/50 text-${cut.color}`}
+                    >
+                      {cut.grade}
+                    </Badge>
+                  </div>
+                </button>
+              ))}
             </div>
-          )}
-        </div>
-      </div>
+          </div>
 
-      {/* Knife Tools */}
-      <div className="warrior-glass rounded-xl p-6 border border-warrior-gold/20">
-        <h4 className="font-semibold text-foreground mb-4">Master's Toolkit</h4>
-        
-        <div className="flex items-center justify-center mb-6">
-          <img
-            src={yakuzaKitchenOven}
-            alt="Yakuza Kitchen Oven"
-            className="w-32 h-24 object-cover rounded-lg warrior-shadow"
-          />
-        </div>
+          {/* Cutting Board */}
+          <div className="warrior-glass rounded-xl p-6 border border-warrior-gold/20">
+            <div className="relative">
+              <img
+                src={wagyuHero}
+                alt="Wagyu Cutting Board"
+                className="w-full h-48 object-cover rounded-lg"
+              />
+              
+              {selectedCut && (
+                <div className="absolute inset-0 flex items-center justify-center bg-black/50 rounded-lg">
+                  <div className="text-center">
+                    <div className="w-16 h-16 warrior-gradient-gold rounded-full flex items-center justify-center mb-4 mx-auto">
+                      <ChefHat size={24} className="text-warrior-dark" />
+                    </div>
+                    <p className="text-white font-medium">
+                      {primalCuts.find(c => c.id === selectedCut)?.name} Ready
+                    </p>
+                  </div>
+                </div>
+              )}
+            </div>
+          </div>
 
-        <div className="grid grid-cols-2 gap-3">
+          {/* Knife Tools */}
+          <div className="warrior-glass rounded-xl p-6 border border-warrior-gold/20">
+            <h4 className="font-semibold text-foreground mb-4">Master's Toolkit</h4>
+            
+            <div className="flex items-center justify-center mb-6">
+              <img
+                src={yakuzaKitchenOven}
+                alt="Yakuza Kitchen Oven"
+                className="w-32 h-24 object-cover rounded-lg warrior-shadow"
+              />
+            </div>
+
+            <div className="grid grid-cols-2 gap-3">
+              <Button
+                variant="warrior"
+                size="lg"
+                onClick={handleStartSlicing}
+                disabled={!selectedCut}
+                className="w-full"
+              >
+                <Play size={16} />
+                Lets Cook this Meat
+              </Button>
+              
+              <Button
+                variant="warrior-outline"
+                size="lg"
+                onClick={resetAllGames}
+                className="w-full"
+              >
+                <RotateCcw size={16} />
+                Reset
+              </Button>
+            </div>
+          </div>
+        </>
+      )}
+
+      {/* Results Screen */}
+      {isGameComplete && (
+        <div className="warrior-glass rounded-xl p-8 border border-warrior-gold/20 text-center">
+          <div className="mb-6">
+            <ChefHat className="w-16 h-16 text-warrior-gold mx-auto mb-4" />
+            <h2 className="text-2xl font-bold text-warrior-gold mb-2">Master Chef Complete!</h2>
+            <p className="text-lg text-foreground mb-4">
+              {primalCuts.find(c => c.id === selectedCut)?.name} Preparation Mastered
+            </p>
+          </div>
+
+          <div className="grid grid-cols-2 gap-4 mb-6">
+            <div className="warrior-glass rounded-lg p-4 border border-warrior-ember/30">
+              <h3 className="text-warrior-ember font-semibold mb-2">Searing Challenge</h3>
+              <p className="text-2xl font-bold text-warrior-ember">{searingScore}</p>
+              <p className="text-sm text-warrior-ember/80">{searingTechnique}</p>
+            </div>
+            <div className="warrior-glass rounded-lg p-4 border border-warrior-gold/30">
+              <h3 className="text-warrior-gold font-semibold mb-2">Slicing Master</h3>
+              <p className="text-2xl font-bold text-warrior-gold">{sliceScore} pts</p>
+              <p className="text-sm text-warrior-gold/80">{totalCuts} precise cuts</p>
+            </div>
+          </div>
+
+          <div className="mb-6">
+            <div className="warrior-glass rounded-lg p-4 border border-warrior-smoke/30">
+              <h3 className="text-warrior-smoke font-semibold mb-2">Total Score</h3>
+              <p className="text-3xl font-bold text-foreground">{searingScore + sliceScore}</p>
+            </div>
+          </div>
+
           <Button
             variant="warrior"
             size="lg"
-            onClick={handleStartSlicing}
-            disabled={!selectedCut}
+            onClick={resetAllGames}
             className="w-full"
           >
             <Play size={16} />
-            Lets Cook this Meat
-          </Button>
-          
-          <Button
-            variant="warrior-outline"
-            size="lg"
-            onClick={() => {
-              setSelectedCut(null);
-              setSliceScore(0);
-              setTotalCuts(0);
-              setSearingScore(0);
-              setSearingTechnique('');
-              setSearingCompleted(false);
-            }}
-            className="w-full"
-          >
-            <RotateCcw size={16} />
-            Reset
+            Do Another Cut
           </Button>
         </div>
-
-        {sliceScore > 0 && (
-          <Button
-            variant="warrior-ghost"
-            size="lg"
-            className="w-full mt-3"
-          >
-            <Save size={16} />
-            Save to Chef's Table
-          </Button>
-        )}
-      </div>
+      )}
 
       {/* Technique Tips */}
       <div className="warrior-glass rounded-xl p-6 border border-warrior-gold/20">
