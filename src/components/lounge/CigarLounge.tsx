@@ -178,6 +178,8 @@ export const CigarLounge = () => {
                   onCigarClick={() => setActiveTab('game')}
                   onDrinkClick={() => setActiveTab('robot')}
                   onBartenderClick={() => setActiveTab('robot')}
+                  activeTab={activeTab}
+                  setActiveTab={setActiveTab}
                 />
               )}
 

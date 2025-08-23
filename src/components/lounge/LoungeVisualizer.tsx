@@ -1,8 +1,10 @@
 import { useState, useEffect } from "react";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
 import { useProfile } from "@/hooks/useProfile";
 import { supabase } from "@/integrations/supabase/client";
+import { Users, Cigarette, MessageCircle, Wine } from "lucide-react";
 import yakuzaRobotWaitress from "@/assets/yakuza-robot-waitress.jpg";
 import yakuzaLoungeBackground from "@/assets/yakuza-lounge-background.jpg";
 import type { LoungeMember } from "@/hooks/useCigarLounges";
@@ -13,6 +15,8 @@ interface LoungeVisualizerProps {
   onCigarClick?: () => void;
   onDrinkClick?: () => void;
   onBartenderClick?: () => void;
+  activeTab?: string;
+  setActiveTab?: (tab: 'lounge' | 'game' | 'chat' | 'robot') => void;
 }
 
 const getStatusEmoji = (status: string) => {
@@ -77,7 +81,7 @@ const seatPositions = [
   { x: 15, y: 65, rotation: 240 },  // Left
 ];
 
-export const LoungeVisualizer = ({ members, currentUserId, onCigarClick, onDrinkClick, onBartenderClick }: LoungeVisualizerProps) => {
+export const LoungeVisualizer = ({ members, currentUserId, onCigarClick, onDrinkClick, onBartenderClick, activeTab, setActiveTab }: LoungeVisualizerProps) => {
   const { getAvatarUrl } = useProfile();
   const [memberAvatars, setMemberAvatars] = useState<Record<string, string | null>>({});
 
@@ -116,6 +120,11 @@ export const LoungeVisualizer = ({ members, currentUserId, onCigarClick, onDrink
     }
   }, [members, getAvatarUrl]);
 
+  // Find current user's position for floating menu
+  const currentUserMember = members.find(m => m.user_id === currentUserId);
+  const currentUserIndex = members.findIndex(m => m.user_id === currentUserId);
+  const currentUserPosition = currentUserIndex >= 0 ? seatPositions[currentUserIndex] : null;
+
   if (members.length === 0) {
     return (
       <Card className="warrior-glass border-warrior-gold/20">
@@ -145,6 +154,56 @@ export const LoungeVisualizer = ({ members, currentUserId, onCigarClick, onDrink
         >
           {/* Dark overlay for better contrast */}
           <div className="absolute inset-0 bg-black/30 backdrop-blur-[0.5px]"></div>
+
+          {/* Floating Tab Navigation - positioned above current user */}
+          {currentUserPosition && setActiveTab && (
+            <div 
+              className="absolute transform -translate-x-1/2 z-50"
+              style={{ 
+                left: `${currentUserPosition.x}%`, 
+                top: `${Math.max(5, currentUserPosition.y - 25)}%` 
+              }}
+            >
+              <div className="flex space-x-1 bg-black/80 backdrop-blur-md p-2 rounded-lg border border-warrior-gold/30 shadow-2xl">
+                <Button
+                  variant={activeTab === 'lounge' ? 'warrior' : 'ghost'}
+                  size="sm"
+                  onClick={() => setActiveTab('lounge')}
+                  className="text-xs px-2 py-1"
+                >
+                  <Users size={12} className="mr-1" />
+                  Lounge
+                </Button>
+                <Button
+                  variant={activeTab === 'game' ? 'warrior' : 'ghost'}
+                  size="sm"
+                  onClick={() => setActiveTab('game')}
+                  className="text-xs px-2 py-1"
+                >
+                  <Cigarette size={12} className="mr-1" />
+                  Cigars
+                </Button>
+                <Button
+                  variant={activeTab === 'chat' ? 'warrior' : 'ghost'}
+                  size="sm"
+                  onClick={() => setActiveTab('chat')}
+                  className="text-xs px-2 py-1"
+                >
+                  <MessageCircle size={12} className="mr-1" />
+                  Chat
+                </Button>
+                <Button
+                  variant={activeTab === 'robot' ? 'warrior' : 'ghost'}
+                  size="sm"
+                  onClick={() => setActiveTab('robot')}
+                  className="text-xs px-2 py-1"
+                >
+                  <Wine size={12} className="mr-1" />
+                  Drinks
+                </Button>
+              </div>
+            </div>
+          )}
           
           {/* Central Table */}
           <div 
