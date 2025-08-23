@@ -11,6 +11,7 @@ interface LoungeVisualizerProps {
   currentUserId?: string;
   onCigarClick?: () => void;
   onDrinkClick?: () => void;
+  onBartenderClick?: () => void;
 }
 
 const getStatusEmoji = (status: string) => {
@@ -75,7 +76,7 @@ const seatPositions = [
   { x: 15, y: 65, rotation: 240 },  // Left
 ];
 
-export const LoungeVisualizer = ({ members, currentUserId, onCigarClick, onDrinkClick }: LoungeVisualizerProps) => {
+export const LoungeVisualizer = ({ members, currentUserId, onCigarClick, onDrinkClick, onBartenderClick }: LoungeVisualizerProps) => {
   const { getAvatarUrl } = useProfile();
   const [memberAvatars, setMemberAvatars] = useState<Record<string, string | null>>({});
 
@@ -151,11 +152,13 @@ export const LoungeVisualizer = ({ members, currentUserId, onCigarClick, onDrink
 
           {/* Yakuza Robot Bartender */}
           <div 
-            className="absolute transform -translate-x-1/2 -translate-y-1/2"
+            className="absolute transform -translate-x-1/2 -translate-y-1/2 cursor-pointer hover:scale-110 transition-all"
             style={{ left: '85%', top: '50%' }}
+            onClick={onBartenderClick}
+            title="Click to order drinks from the bartender"
           >
             <div className="relative">
-              <div className="w-16 h-16 rounded-full border-2 border-warrior-ember bg-warrior-ember/20 flex items-center justify-center overflow-hidden">
+              <div className="w-16 h-16 rounded-full border-2 border-warrior-ember bg-warrior-ember/20 flex items-center justify-center overflow-hidden hover:border-warrior-ember/80 transition-colors">
                 <img 
                   src={yakuzaRobotWaitress} 
                   alt="Yakuza Robot Waitress" 
@@ -171,7 +174,7 @@ export const LoungeVisualizer = ({ members, currentUserId, onCigarClick, onDrink
                 <div className="text-center">
                   <div className="text-xs font-medium text-warrior-ember">Bartender</div>
                   <Badge variant="outline" className="text-xs mt-1 bg-warrior-ember/10 text-warrior-ember">
-                    Online
+                    Ready to Serve
                   </Badge>
                 </div>
               </div>

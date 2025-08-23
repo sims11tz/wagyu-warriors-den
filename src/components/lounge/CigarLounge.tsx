@@ -177,6 +177,7 @@ export const CigarLounge = () => {
                   currentUserId={user?.id}
                   onCigarClick={() => setActiveTab('game')}
                   onDrinkClick={() => setActiveTab('robot')}
+                  onBartenderClick={() => setActiveTab('robot')}
                 />
               )}
 
