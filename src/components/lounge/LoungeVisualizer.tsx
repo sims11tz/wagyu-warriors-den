@@ -46,7 +46,7 @@ const getCigarVisual = (member: LoungeMember) => {
     case 'smoking':
       return { emoji: '💨', status: 'Smoking' };
     case 'finished':
-      return { emoji: '🏁', status: 'Finished' };
+      return { emoji: '🚬', status: 'Finished' };
     default:
       return member.selected_cigar_id ? { emoji: '🚬', status: 'Selected' } : null;
   }
