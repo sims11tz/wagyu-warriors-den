@@ -213,7 +213,7 @@ export const LoungeVisualizer = ({ members, currentUserId, onCigarClick, onDrink
                 {/* Seat */}
                 <div className="relative">
                   <div 
-                    className={`w-18 h-18 rounded-full border-3 flex items-center justify-center transition-all overflow-hidden shadow-2xl backdrop-blur-sm ${
+                    className={`w-16 h-16 rounded-full border-2 flex items-center justify-center transition-all overflow-hidden shadow-2xl backdrop-blur-sm ${
                       isCurrentUser 
                         ? 'border-warrior-gold bg-warrior-gold/30' 
                         : 'border-warrior-leather/70 bg-warrior-leather/20'
@@ -226,7 +226,7 @@ export const LoungeVisualizer = ({ members, currentUserId, onCigarClick, onDrink
                         className="w-full h-full object-cover rounded-full"
                       />
                     ) : (
-                      <div className="w-14 h-14 rounded-full bg-warrior-leather/40 flex items-center justify-center text-warrior-gold text-xl font-bold drop-shadow-lg">
+                      <div className="w-12 h-12 rounded-full bg-warrior-leather/40 flex items-center justify-center text-warrior-gold text-lg font-bold drop-shadow-lg">
                         {(member.handle || 'A')[0].toUpperCase()}
                       </div>
                     )}
@@ -239,13 +239,13 @@ export const LoungeVisualizer = ({ members, currentUserId, onCigarClick, onDrink
                     const isClickable = isCurrentUser && onCigarClick;
                     return (
                       <div 
-                        className={`absolute -right-7 top-2 bg-warrior-leather/90 rounded-full p-2 border border-warrior-gold/50 shadow-lg backdrop-blur-sm ${
+                        className={`absolute -right-6 top-2 bg-warrior-leather/90 rounded-full p-1 border border-warrior-gold/50 shadow-lg backdrop-blur-sm ${
                           isClickable ? 'cursor-pointer hover:bg-warrior-leather hover:scale-110 transition-all z-20' : ''
                         }`}
                         title={isClickable ? `Click to ${cigar.status === 'Smoking' ? 'continue smoking' : 'manage cigar'}` : `Cigar: ${cigar.status}`}
                         onClick={isClickable ? onCigarClick : undefined}
                       >
-                        <span className="text-lg drop-shadow-md">{cigar.emoji}</span>
+                        <span className="text-sm drop-shadow-md">{cigar.emoji}</span>
                       </div>
                     );
                   })()}
@@ -257,20 +257,20 @@ export const LoungeVisualizer = ({ members, currentUserId, onCigarClick, onDrink
                     const isClickable = isCurrentUser && onDrinkClick;
                     return (
                       <div 
-                        className={`absolute -left-7 top-2 bg-warrior-leather/90 rounded-full p-2 border border-warrior-gold/50 shadow-lg backdrop-blur-sm ${drink.opacity} ${
+                        className={`absolute -left-6 top-2 bg-warrior-leather/90 rounded-full p-1 border border-warrior-gold/50 shadow-lg backdrop-blur-sm ${drink.opacity} ${
                           isClickable ? 'cursor-pointer hover:bg-warrior-leather hover:scale-110 transition-all z-20' : ''
                         }`}
                         title={isClickable ? `Click to ${drink.status === 'Empty' ? 'order new drink' : 'continue drinking'}` : `Drink: ${drink.status}`}
                         onClick={isClickable ? onDrinkClick : undefined}
                       >
-                        <span className="text-lg drop-shadow-md">{drink.emoji}</span>
+                        <span className="text-sm drop-shadow-md">{drink.emoji}</span>
                       </div>
                     );
                   })()}
 
                   {/* Status Indicator */}
                   <div className="absolute -top-2 -right-2">
-                    <div className={`w-10 h-10 rounded-full border-2 border-background flex items-center justify-center text-sm shadow-xl backdrop-blur-sm ${getStatusColor(member.cigar_status)}`}>
+                    <div className={`w-8 h-8 rounded-full border-2 border-background flex items-center justify-center text-sm shadow-xl backdrop-blur-sm ${getStatusColor(member.cigar_status)}`}>
                       <span className="drop-shadow-md">{getStatusEmoji(member.cigar_status)}</span>
                     </div>
                   </div>
