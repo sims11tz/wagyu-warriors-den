@@ -3,6 +3,7 @@ import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { X, Trophy, Timer, Flame, Thermometer } from 'lucide-react';
 import { toast } from 'sonner';
+import rawWagyuSteak from '@/assets/raw-wagyu-steak.jpg';
 
 interface SearingGameProps {
   cutType: string;
@@ -27,7 +28,7 @@ export const SearingGame: React.FC<SearingGameProps> = ({
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const [gameStarted, setGameStarted] = useState(false);
   const [gameEnded, setGameEnded] = useState(false);
-  const [timeLeft, setTimeLeft] = useState(45);
+  const [timeLeft, setTimeLeft] = useState(60); // Extended to 60 seconds
   const [temperature, setTemperature] = useState(350); // Starting temp
   const [targetTemp, setTargetTemp] = useState(425); // Ideal searing temp
   const [currentSide, setCurrentSide] = useState<'side1' | 'side2' | 'resting'>('side1');
@@ -35,6 +36,7 @@ export const SearingGame: React.FC<SearingGameProps> = ({
   const [score, setScore] = useState(0);
   const [isPressed, setIsPressed] = useState(false);
   const [pressPosition, setPressPosition] = useState<{ x: number; y: number } | null>(null);
+  const imageRef = useRef<HTMLImageElement>(null);
   
   // Searing zones for the meat (side 1 and side 2)
   const [searZonesSide1, setSearZonesSide1] = useState<SearZone[]>([]);
@@ -89,13 +91,13 @@ export const SearingGame: React.FC<SearingGameProps> = ({
     return () => clearInterval(timer);
   }, [gameStarted, gameEnded, isPressed]);
 
-  // Auto-flip logic
+  // Auto-flip logic - extended timing for 60 second game
   useEffect(() => {
-    if (currentSide === 'side1' && sideTime >= 15) {
+    if (currentSide === 'side1' && sideTime >= 25) { // 25 seconds per side
       setCurrentSide('side2');
       setSideTime(0);
       toast.success('Perfect timing! Flip to side 2!');
-    } else if (currentSide === 'side2' && sideTime >= 15) {
+    } else if (currentSide === 'side2' && sideTime >= 25) {
       setCurrentSide('resting');
       setSideTime(0);
       toast.success('Great! Now let it rest...');
@@ -228,9 +230,25 @@ export const SearingGame: React.FC<SearingGameProps> = ({
     if (gameStarted) {
       console.log('Drawing game state:', { currentSide, zonesCount: searZonesSide1.length });
       
-      // Draw meat base
-      ctx.fillStyle = '#8B4513';
-      ctx.fillRect(100, 130, 420, 210);
+      // Draw the wagyu steak image first (background)
+      const img = imageRef.current;
+      if (img && img.complete) {
+        const meatWidth = 420;
+        const meatHeight = 210;
+        const meatX = 100;
+        const meatY = 130;
+        
+        // Draw the wagyu image as background
+        ctx.drawImage(img, meatX, meatY, meatWidth, meatHeight);
+        
+        // Add a subtle overlay for the searing zones to be visible
+        ctx.fillStyle = 'rgba(0, 0, 0, 0.1)';
+        ctx.fillRect(meatX, meatY, meatWidth, meatHeight);
+      } else {
+        // Fallback brown meat base if image doesn't load
+        ctx.fillStyle = '#8B4513';
+        ctx.fillRect(100, 130, 420, 210);
+      }
       
       // Draw searing zones
       const currentZones = currentSide === 'side1' ? searZonesSide1 : 
@@ -239,51 +257,85 @@ export const SearingGame: React.FC<SearingGameProps> = ({
       console.log('Drawing zones:', currentZones.length);
 
       currentZones.forEach((zone, index) => {
-        // Zone background
-        ctx.fillStyle = zone.overcooked ? '#8B0000' : 
-                       zone.seared > 60 ? '#D2691E' : 
-                       zone.seared > 30 ? '#CD853F' : '#DEB887';
+        // More realistic searing colors based on progression
+        let zoneColor;
+        let zoneOpacity = 0.7;
+        
+        if (zone.overcooked) {
+          zoneColor = '#2F1B14'; // Very dark brown/black
+          zoneOpacity = 0.9;
+        } else if (zone.seared > 80) {
+          zoneColor = '#5D2E0A'; // Dark brown
+          zoneOpacity = 0.8;
+        } else if (zone.seared > 60) {
+          zoneColor = '#8B4513'; // Medium brown  
+          zoneOpacity = 0.7;
+        } else if (zone.seared > 30) {
+          zoneColor = '#CD853F'; // Light brown
+          zoneOpacity = 0.5;
+        } else if (zone.seared > 10) {
+          zoneColor = '#DEB887'; // Very light brown
+          zoneOpacity = 0.3;
+        } else {
+          // No searing yet - slightly transparent overlay
+          zoneColor = '#FFB6C1';
+          zoneOpacity = 0.1;
+        }
+        
+        // Draw the searing overlay
+        ctx.fillStyle = `rgba(${parseInt(zoneColor.slice(1,3), 16)}, ${parseInt(zoneColor.slice(3,5), 16)}, ${parseInt(zoneColor.slice(5,7), 16)}, ${zoneOpacity})`;
         ctx.beginPath();
         ctx.arc(zone.x, zone.y, 35, 0, Math.PI * 2);
         ctx.fill();
         
-        // Zone border for visibility
-        ctx.strokeStyle = '#654321';
-        ctx.lineWidth = 2;
-        ctx.stroke();
-
-        // Searing progress indicator
-        if (zone.seared > 0) {
-          ctx.fillStyle = zone.overcooked ? '#FF0000' : '#8B4513';
+        // Add searing texture effect for cooked areas
+        if (zone.seared > 20) {
+          ctx.fillStyle = `rgba(139, 69, 19, ${0.2 + (zone.seared / 100) * 0.3})`;
           ctx.beginPath();
-          ctx.arc(zone.x, zone.y, 35 * (zone.seared / 100), 0, Math.PI * 2);
+          ctx.arc(zone.x, zone.y, 32, 0, Math.PI * 2);
           ctx.fill();
         }
         
-        // Debug: show zone numbers
-        ctx.fillStyle = '#FFFFFF';
-        ctx.font = '12px Arial';
+        // Zone border for visibility
+        ctx.strokeStyle = zone.seared > 0 ? '#4A4A4A' : 'rgba(255, 255, 255, 0.3)';
+        ctx.lineWidth = 1;
+        ctx.beginPath();
+        ctx.arc(zone.x, zone.y, 35, 0, Math.PI * 2);
+        ctx.stroke();
+
+        // Debug: show zone numbers (smaller and less intrusive)
+        ctx.fillStyle = 'rgba(255, 255, 255, 0.7)';
+        ctx.font = '10px Arial';
         ctx.textAlign = 'center';
-        ctx.fillText(index.toString(), zone.x, zone.y + 4);
+        ctx.fillText(index.toString(), zone.x, zone.y + 3);
       });
 
-      // Draw current press position
+      // Draw current press position with more realistic searing effect
       if (isPressed && pressPosition) {
         console.log('Drawing press effect at:', pressPosition);
-        ctx.fillStyle = 'rgba(255, 215, 0, 0.6)';
+        
+        // Main searing area
+        ctx.fillStyle = 'rgba(255, 140, 0, 0.6)';
         ctx.beginPath();
         ctx.arc(pressPosition.x, pressPosition.y, 45, 0, Math.PI * 2);
         ctx.fill();
 
-        // Sizzle effect
-        for (let i = 0; i < 6; i++) {
-          const angle = (Math.PI * 2 * i) / 6;
-          const sparkX = pressPosition.x + Math.cos(angle) * (30 + Math.random() * 20);
-          const sparkY = pressPosition.y + Math.sin(angle) * (30 + Math.random() * 20);
+        // Hot center
+        ctx.fillStyle = 'rgba(255, 69, 0, 0.8)';
+        ctx.beginPath();
+        ctx.arc(pressPosition.x, pressPosition.y, 25, 0, Math.PI * 2);
+        ctx.fill();
+
+        // Sizzle effect - more intense
+        for (let i = 0; i < 8; i++) {
+          const angle = (Math.PI * 2 * i) / 8;
+          const distance = 20 + Math.random() * 25;
+          const sparkX = pressPosition.x + Math.cos(angle) * distance;
+          const sparkY = pressPosition.y + Math.sin(angle) * distance;
           
-          ctx.fillStyle = `rgba(255, ${100 + Math.random() * 155}, 0, ${0.3 + Math.random() * 0.7})`;
+          ctx.fillStyle = `rgba(255, ${100 + Math.random() * 155}, 0, ${0.4 + Math.random() * 0.6})`;
           ctx.beginPath();
-          ctx.arc(sparkX, sparkY, 2 + Math.random() * 3, 0, Math.PI * 2);
+          ctx.arc(sparkX, sparkY, 1.5 + Math.random() * 2.5, 0, Math.PI * 2);
           ctx.fill();
         }
       }
@@ -292,18 +344,21 @@ export const SearingGame: React.FC<SearingGameProps> = ({
       ctx.fillStyle = '#FFFFFF';
       ctx.font = 'bold 20px Arial';
       ctx.textAlign = 'center';
+      ctx.shadowColor = 'rgba(0, 0, 0, 0.8)';
+      ctx.shadowBlur = 4;
       ctx.fillText(
         currentSide === 'side1' ? 'Side 1 - Sear evenly!' :
         currentSide === 'side2' ? 'Side 2 - Finish strong!' : 
         'Resting - Let the juices settle...', 
         width / 2, 50
       );
+      ctx.shadowBlur = 0;
     }
   }, [gameStarted, currentSide, searZonesSide1, searZonesSide2, isPressed, pressPosition]);
 
   const startGame = () => {
     setGameStarted(true);
-    setTimeLeft(45);
+    setTimeLeft(60); // 60 seconds total
     setScore(0);
     setGameEnded(false);
     setCurrentSide('side1');
@@ -338,7 +393,7 @@ export const SearingGame: React.FC<SearingGameProps> = ({
               <div className="space-y-3 text-sm text-warrior-light text-left">
                 <p>🔥 <span className="text-warrior-gold">Click and hold</span> on the meat to sear different zones</p>
                 <p>🌡️ <span className="text-green-400">Maintain 400-450°F</span> for perfect searing</p>
-                <p>⏰ <span className="text-orange-400">15 seconds per side</span> - timing is everything!</p>
+                <p>⏰ <span className="text-orange-400">25 seconds per side</span> - timing is everything!</p>
                 <p>🎯 <span className="text-warrior-ember">Sear evenly</span> across all zones for maximum score</p>
                 <p className="text-red-400 font-semibold">⚠️ Too hot = overcooked and ruined!</p>
               </div>
@@ -369,6 +424,22 @@ export const SearingGame: React.FC<SearingGameProps> = ({
             </div>
 
             <div className="relative mb-4">
+              {/* Hidden image for canvas drawing */}
+              <img 
+                ref={imageRef} 
+                src={rawWagyuSteak} 
+                alt="Raw wagyu steak" 
+                style={{ display: 'none' }} 
+                onLoad={() => {
+                  console.log('Wagyu steak image loaded');
+                  // Force canvas redraw when image loads
+                  const canvas = canvasRef.current;
+                  if (canvas && gameStarted) {
+                    // Trigger re-render
+                  }
+                }}
+                onError={(e) => console.error('Failed to load wagyu steak image:', e)}
+              />
               <canvas
                 ref={canvasRef}
                 width={620}
