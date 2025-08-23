@@ -172,7 +172,12 @@ export const CigarLounge = () => {
 
               {/* Tab Content */}
               {activeTab === 'lounge' && (
-                <LoungeVisualizer members={members} currentUserId={user?.id} />
+                <LoungeVisualizer 
+                  members={members} 
+                  currentUserId={user?.id}
+                  onCigarClick={() => setActiveTab('game')}
+                  onDrinkClick={() => setActiveTab('robot')}
+                />
               )}
 
               {activeTab === 'game' && currentMember && (

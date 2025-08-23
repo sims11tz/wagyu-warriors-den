@@ -9,6 +9,8 @@ import type { LoungeMember } from "@/hooks/useCigarLounges";
 interface LoungeVisualizerProps {
   members: LoungeMember[];
   currentUserId?: string;
+  onCigarClick?: () => void;
+  onDrinkClick?: () => void;
 }
 
 const getStatusEmoji = (status: string) => {
@@ -73,7 +75,7 @@ const seatPositions = [
   { x: 15, y: 65, rotation: 240 },  // Left
 ];
 
-export const LoungeVisualizer = ({ members, currentUserId }: LoungeVisualizerProps) => {
+export const LoungeVisualizer = ({ members, currentUserId, onCigarClick, onDrinkClick }: LoungeVisualizerProps) => {
   const { getAvatarUrl } = useProfile();
   const [memberAvatars, setMemberAvatars] = useState<Record<string, string | null>>({});
 
@@ -217,10 +219,14 @@ export const LoungeVisualizer = ({ members, currentUserId }: LoungeVisualizerPro
                   {(() => {
                     const cigar = getCigarVisual(member);
                     if (!cigar) return null;
+                    const isClickable = isCurrentUser && onCigarClick;
                     return (
                       <div 
-                        className="absolute -right-6 top-2 bg-warrior-leather/80 rounded-full p-1 border border-warrior-gold/30"
-                        title={`Cigar: ${cigar.status}`}
+                        className={`absolute -right-6 top-2 bg-warrior-leather/80 rounded-full p-1 border border-warrior-gold/30 ${
+                          isClickable ? 'cursor-pointer hover:bg-warrior-leather hover:scale-110 transition-all' : ''
+                        }`}
+                        title={isClickable ? `Click to ${cigar.status === 'Smoking' ? 'continue smoking' : 'manage cigar'}` : `Cigar: ${cigar.status}`}
+                        onClick={isClickable ? onCigarClick : undefined}
                       >
                         <span className="text-sm">{cigar.emoji}</span>
                       </div>
@@ -231,10 +237,14 @@ export const LoungeVisualizer = ({ members, currentUserId }: LoungeVisualizerPro
                   {(() => {
                     const drink = getDrinkVisual(member);
                     if (!drink) return null;
+                    const isClickable = isCurrentUser && onDrinkClick;
                     return (
                       <div 
-                        className={`absolute -left-6 top-2 bg-warrior-leather/80 rounded-full p-1 border border-warrior-gold/30 ${drink.opacity}`}
-                        title={`Drink: ${drink.status}`}
+                        className={`absolute -left-6 top-2 bg-warrior-leather/80 rounded-full p-1 border border-warrior-gold/30 ${drink.opacity} ${
+                          isClickable ? 'cursor-pointer hover:bg-warrior-leather hover:scale-110 transition-all' : ''
+                        }`}
+                        title={isClickable ? `Click to ${drink.status === 'Empty' ? 'order new drink' : 'continue drinking'}` : `Drink: ${drink.status}`}
+                        onClick={isClickable ? onDrinkClick : undefined}
                       >
                         <span className="text-sm">{drink.emoji}</span>
                       </div>
