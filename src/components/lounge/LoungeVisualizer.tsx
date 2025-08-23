@@ -2,6 +2,8 @@ import { useState, useEffect } from "react";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { useProfile } from "@/hooks/useProfile";
+import { supabase } from "@/integrations/supabase/client";
+import yakuzaRobotWaitress from "@/assets/yakuza-robot-waitress.jpg";
 import type { LoungeMember } from "@/hooks/useCigarLounges";
 
 interface LoungeVisualizerProps {
@@ -51,8 +53,24 @@ export const LoungeVisualizer = ({ members, currentUserId }: LoungeVisualizerPro
       
       for (const member of members) {
         if (member.user_id) {
-          // For now, we'll use a placeholder since we need the avatar_id from profiles
-          avatars[member.user_id] = null;
+          try {
+            // Fetch the profile to get avatar_id
+            const { data: profile } = await supabase
+              .from('profiles')
+              .select('avatar_id')
+              .eq('user_id', member.user_id)
+              .single();
+
+            if (profile?.avatar_id) {
+              const avatarUrl = await getAvatarUrl(profile.avatar_id);
+              avatars[member.user_id] = avatarUrl;
+            } else {
+              avatars[member.user_id] = null;
+            }
+          } catch (error) {
+            console.error('Error fetching avatar for user:', member.user_id, error);
+            avatars[member.user_id] = null;
+          }
         }
       }
       
@@ -105,8 +123,12 @@ export const LoungeVisualizer = ({ members, currentUserId }: LoungeVisualizerPro
             style={{ left: '85%', top: '50%' }}
           >
             <div className="relative">
-              <div className="w-12 h-12 rounded-full border-2 border-warrior-ember bg-warrior-ember/20 flex items-center justify-center">
-                <div className="text-lg">🤖</div>
+              <div className="w-16 h-16 rounded-full border-2 border-warrior-ember bg-warrior-ember/20 flex items-center justify-center overflow-hidden">
+                <img 
+                  src={yakuzaRobotWaitress} 
+                  alt="Yakuza Robot Waitress" 
+                  className="w-full h-full object-cover rounded-full"
+                />
               </div>
               <div className="absolute -top-1 -right-1">
                 <div className="w-4 h-4 rounded-full bg-green-500 border border-background flex items-center justify-center">
@@ -142,7 +164,7 @@ export const LoungeVisualizer = ({ members, currentUserId }: LoungeVisualizerPro
                 {/* Seat */}
                 <div className="relative">
                   <div 
-                    className={`w-16 h-16 rounded-full border-2 flex items-center justify-center transition-all ${
+                    className={`w-16 h-16 rounded-full border-2 flex items-center justify-center transition-all overflow-hidden ${
                       isCurrentUser 
                         ? 'border-warrior-gold bg-warrior-gold/20' 
                         : 'border-warrior-leather/50 bg-warrior-leather/10'
@@ -152,7 +174,7 @@ export const LoungeVisualizer = ({ members, currentUserId }: LoungeVisualizerPro
                       <img 
                         src={avatar} 
                         alt={member.handle || 'Member'} 
-                        className="w-12 h-12 rounded-full object-cover"
+                        className="w-full h-full object-cover rounded-full"
                       />
                     ) : (
                       <div className="w-12 h-12 rounded-full bg-warrior-leather/30 flex items-center justify-center text-warrior-gold text-lg font-bold">
