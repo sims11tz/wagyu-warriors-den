@@ -70,6 +70,7 @@ export const SlicingGame: React.FC<SlicingGameProps> = ({
   // End game when time runs out
   useEffect(() => {
     if (gameEnded && gameStarted) {
+      console.log('Game ended!', { completionReason, gameEnded, gameStarted });
       const finalScore = calculateFinalScore();
       onComplete(finalScore, cuts.length);
     }
@@ -473,17 +474,19 @@ export const SlicingGame: React.FC<SlicingGameProps> = ({
               />
               
               {gameEnded && (
-                <div className="absolute inset-0 bg-black/70 flex items-center justify-center rounded-lg">
-                  <div className="text-center warrior-glass p-6 rounded-xl border border-warrior-gold/20 max-w-md">
+                <div className="absolute inset-0 bg-black/90 flex items-center justify-center rounded-lg z-50">
+                  <div className="text-center bg-warrior-leather p-6 rounded-xl border-2 border-warrior-gold/50 max-w-md shadow-2xl">
                     <div className="mb-4">
                       <img 
                         src={yakuzaWarriorEating} 
                         alt="Yakuza warrior enjoying the perfectly sliced wagyu" 
-                        className="w-full h-32 object-cover rounded-lg border border-warrior-gold/30"
+                        className="w-full h-40 object-cover rounded-lg border-2 border-warrior-gold/50"
+                        onLoad={() => console.log('Yakuza warrior image loaded successfully')}
+                        onError={(e) => console.error('Failed to load yakuza warrior image:', e)}
                       />
                     </div>
-                    <Trophy className="w-12 h-12 text-warrior-gold mx-auto mb-3" />
-                    <h3 className="text-xl font-bold text-warrior-gold mb-2">
+                    <Trophy className="w-16 h-16 text-warrior-gold mx-auto mb-3" />
+                    <h3 className="text-2xl font-bold text-warrior-gold mb-2">
                       {completionReason === 'perfect' ? 'Master Achievement!' : 'Challenge Complete!'}
                     </h3>
                     {completionReason === 'perfect' && (
@@ -495,9 +498,9 @@ export const SlicingGame: React.FC<SlicingGameProps> = ({
                       {completionReason === 'perfect' && timeLeft > 0 && (
                         <p className="text-warrior-gold">Time bonus: +{timeLeft * 10} points ({timeLeft}s)</p>
                       )}
-                      <p className="text-warrior-gold font-semibold">Final Score: {calculateFinalScore()}</p>
+                      <p className="text-warrior-gold font-semibold text-lg">Final Score: {calculateFinalScore()}</p>
                     </div>
-                    <p className="text-warrior-light text-xs mt-2 italic">The yakuza warrior savors your masterful cuts</p>
+                    <p className="text-warrior-light text-sm mt-2 italic font-medium">The yakuza warrior savors your masterful cuts</p>
                     
                     <div className="mt-4 space-y-2">
                       <Button 
