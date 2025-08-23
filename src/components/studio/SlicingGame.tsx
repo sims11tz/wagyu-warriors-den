@@ -39,6 +39,7 @@ export const SlicingGame: React.FC<SlicingGameProps> = ({
   const [score, setScore] = useState(0);
   const [gameStarted, setGameStarted] = useState(false);
   const [gameEnded, setGameEnded] = useState(false);
+  const [completionReason, setCompletionReason] = useState<'time' | 'perfect'>('time');
   const [cutEffects, setCutEffects] = useState<CutEffect[]>([]);
   const [previewLine, setPreviewLine] = useState<{ x1: number; y1: number; x2: number; y2: number } | null>(null);
   const imageRef = useRef<HTMLImageElement>(null);
@@ -50,6 +51,7 @@ export const SlicingGame: React.FC<SlicingGameProps> = ({
     const timer = setInterval(() => {
       setTimeLeft((prev) => {
         if (prev <= 1) {
+          setCompletionReason('time');
           setGameEnded(true);
           return 0;
         }
@@ -66,14 +68,22 @@ export const SlicingGame: React.FC<SlicingGameProps> = ({
       const finalScore = calculateFinalScore();
       onComplete(finalScore, cuts.length);
     }
-  }, [gameEnded, gameStarted]);
+  }, [gameEnded, gameStarted, cuts, timeLeft, completionReason]);
 
   const calculateFinalScore = () => {
     const perfectCuts = cuts.filter(cut => cut.quality === 'perfect').length;
     const goodCuts = cuts.filter(cut => cut.quality === 'good').length;
     const poorCuts = cuts.filter(cut => cut.quality === 'poor').length;
     
-    return (perfectCuts * 100) + (goodCuts * 60) + (poorCuts * 20);
+    let baseScore = (perfectCuts * 100) + (goodCuts * 60) + (poorCuts * 20);
+    
+    // Add time bonus if completed early with 5 perfect cuts
+    if (completionReason === 'perfect' && timeLeft > 0) {
+      const timeBonus = timeLeft * 10; // 10 points per second remaining
+      baseScore += timeBonus;
+    }
+    
+    return baseScore;
   };
 
   // Add cut effect animation
@@ -290,7 +300,19 @@ export const SlicingGame: React.FC<SlicingGameProps> = ({
       const midY = (startY + endY) / 2;
       addCutEffect(midX, midY);
 
-      setCuts(prev => [...prev, newCut]);
+      setCuts(prev => {
+        const updatedCuts = [...prev, newCut];
+        
+        // Check for early completion - 5 perfect cuts
+        const perfectCuts = updatedCuts.filter(cut => cut.quality === 'perfect').length;
+        if (perfectCuts >= 5) {
+          setCompletionReason('perfect');
+          setGameEnded(true);
+        }
+        
+        return updatedCuts;
+      });
+      
       setScore(prev => prev + (quality === 'perfect' ? 100 : quality === 'good' ? 60 : 20));
       setIsSlicing(false);
       setPreviewLine(null); // Clear preview line
@@ -309,6 +331,7 @@ export const SlicingGame: React.FC<SlicingGameProps> = ({
     setCuts([]);
     setScore(0);
     setGameEnded(false);
+    setCompletionReason('time');
     setPreviewLine(null);
     setCutEffects([]);
   };
@@ -341,7 +364,8 @@ export const SlicingGame: React.FC<SlicingGameProps> = ({
                   <p>• <span className="text-green-400">Perfect cuts:</span> Long, straight vertical slices = 100 points</p>
                   <p>• <span className="text-orange-400">Good cuts:</span> Decent vertical lines = 60 points</p>
                   <p>• <span className="text-red-400">Poor cuts:</span> Short or crooked cuts = 20 points</p>
-                  <p className="mt-2 text-warrior-gold italic">💡 Tip: Slice across the grain for tender wagyu steaks!</p>
+                  <p className="mt-2 text-warrior-gold font-semibold">🎯 Master Challenge: Make 5 perfect cuts to finish early!</p>
+                  <p className="text-warrior-gold italic">⏱️ Time bonus: +10 points per second remaining</p>
                 </div>
             </div>
             <Button variant="warrior" size="lg" onClick={startGame} className="w-full">
@@ -362,7 +386,7 @@ export const SlicingGame: React.FC<SlicingGameProps> = ({
                 </Badge>
                 <Badge variant="outline" className="border-warrior-smoke text-warrior-smoke">
                   <Target size={14} className="mr-1" />
-                  {cuts.length} cuts
+                  {cuts.length} cuts ({perfectCuts}/5 perfect)
                 </Badge>
               </div>
             </div>
@@ -408,11 +432,19 @@ export const SlicingGame: React.FC<SlicingGameProps> = ({
                 <div className="absolute inset-0 bg-black/70 flex items-center justify-center rounded-lg">
                   <div className="text-center warrior-glass p-6 rounded-xl border border-warrior-gold/20">
                     <Trophy className="w-12 h-12 text-warrior-gold mx-auto mb-3" />
-                    <h3 className="text-xl font-bold text-warrior-gold mb-2">Challenge Complete!</h3>
+                    <h3 className="text-xl font-bold text-warrior-gold mb-2">
+                      {completionReason === 'perfect' ? 'Master Achievement!' : 'Challenge Complete!'}
+                    </h3>
+                    {completionReason === 'perfect' && (
+                      <p className="text-green-400 font-semibold mb-2">🎯 5 Perfect Cuts! Early Completion Bonus!</p>
+                    )}
                     <div className="space-y-1 text-sm">
                       <p className="text-green-400">Perfect cuts: {perfectCuts}</p>
                       <p className="text-orange-400">Good cuts: {goodCuts}</p>
-                      <p className="text-warrior-gold font-semibold">Final Score: {score}</p>
+                      {completionReason === 'perfect' && timeLeft > 0 && (
+                        <p className="text-warrior-gold">Time bonus: +{timeLeft * 10} points ({timeLeft}s)</p>
+                      )}
+                      <p className="text-warrior-gold font-semibold">Final Score: {calculateFinalScore()}</p>
                     </div>
                   </div>
                 </div>
