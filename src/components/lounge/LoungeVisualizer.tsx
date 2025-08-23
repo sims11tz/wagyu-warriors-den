@@ -371,7 +371,9 @@ export const LoungeVisualizer = ({ members, currentUserId, onCigarClick, onDrink
               className="absolute transform -translate-x-1/2 z-50"
               style={{ 
                 left: `${currentUserPosition.x}%`, 
-                top: `${Math.min(85, currentUserPosition.y + 35)}%` 
+                top: currentUserPosition.y > 70 
+                  ? `${Math.max(5, currentUserPosition.y - 45)}%`  // Show above for bottom seats
+                  : `${Math.min(75, currentUserPosition.y + 25)}%`  // Show below for top seats
               }}
             >
               <div className="bg-black/90 backdrop-blur-md rounded-lg border border-warrior-gold/30 shadow-2xl p-4 min-w-[300px]">
