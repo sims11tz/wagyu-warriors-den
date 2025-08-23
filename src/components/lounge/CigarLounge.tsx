@@ -12,7 +12,7 @@ import { LoungeVisualizer } from "./LoungeVisualizer";
 import { CigarGame } from "@/components/studio/CigarGame";
 import { YakuzaRobot } from "./YakuzaRobot";
 import { DrinkingGame } from "./DrinkingGame";
-import { Shield, Users, MessageCircle, Plus, LogOut, Gamepad2, Bot } from "lucide-react";
+import { Shield, Users, MessageCircle, Plus, LogOut, Cigarette, Wine, Bot } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 
 export const CigarLounge = () => {
@@ -147,8 +147,8 @@ export const CigarLounge = () => {
                   onClick={() => setActiveTab('game')}
                   className="flex-1"
                 >
-                  <Gamepad2 size={16} className="mr-2" />
-                  Game
+                  <Cigarette size={16} className="mr-2" />
+                  Cigar Selection
                 </Button>
                 <Button
                   variant={activeTab === 'chat' ? 'warrior' : 'ghost'}
@@ -165,8 +165,8 @@ export const CigarLounge = () => {
                   onClick={() => setActiveTab('robot')}
                   className="flex-1"
                 >
-                  <Bot size={16} className="mr-2" />
-                  Bar
+                  <Wine size={16} className="mr-2" />
+                  Order Drinks
                 </Button>
               </div>
 
