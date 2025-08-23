@@ -2,9 +2,13 @@ import { useState, useEffect } from "react";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { ScrollArea } from "@/components/ui/scroll-area";
 import { useProfile } from "@/hooks/useProfile";
+import { useLoungeChat, ChatMessage } from "@/hooks/useLoungeChat";
+import { useAuth } from "@/contexts/AuthContext";
 import { supabase } from "@/integrations/supabase/client";
-import { Users, Cigarette, MessageCircle, Wine, X } from "lucide-react";
+import { Users, Cigarette, Wine, X, Send } from "lucide-react";
 import { DrinkingGame } from "./DrinkingGame";
 import { CigarGame } from "@/components/studio/CigarGame";
 import yakuzaRobotWaitress from "@/assets/yakuza-robot-waitress.jpg";
@@ -18,9 +22,10 @@ interface LoungeVisualizerProps {
   onDrinkClick?: () => void;
   onBartenderClick?: () => void;
   activeTab?: string;
-  setActiveTab?: (tab: 'lounge' | 'game' | 'chat' | 'robot') => void;
+  setActiveTab?: (tab: 'lounge' | 'game' | 'robot') => void;
   onDrinkProgressUpdate?: (progress: number) => void;
   onCigarStatusUpdate?: (status: string, cigarId?: number) => void;
+  loungeId?: string | null;
 }
 
 const getStatusEmoji = (status: string) => {
@@ -85,11 +90,16 @@ const seatPositions = [
   { x: 15, y: 65, rotation: 240 },  // Left
 ];
 
-export const LoungeVisualizer = ({ members, currentUserId, onCigarClick, onDrinkClick, onBartenderClick, activeTab, setActiveTab, onDrinkProgressUpdate, onCigarStatusUpdate }: LoungeVisualizerProps) => {
+export const LoungeVisualizer = ({ members, currentUserId, onCigarClick, onDrinkClick, onBartenderClick, activeTab, setActiveTab, onDrinkProgressUpdate, onCigarStatusUpdate, loungeId }: LoungeVisualizerProps) => {
   const { getAvatarUrl } = useProfile();
+  const { user } = useAuth();
   const [memberAvatars, setMemberAvatars] = useState<Record<string, string | null>>({});
   const [showDrinkingGame, setShowDrinkingGame] = useState(false);
   const [showCigarGame, setShowCigarGame] = useState(false);
+  
+  // Chat functionality
+  const { messages, sendMessage } = useLoungeChat(loungeId);
+  const [newMessage, setNewMessage] = useState("");
 
   useEffect(() => {
     const fetchAvatars = async () => {
@@ -125,6 +135,15 @@ export const LoungeVisualizer = ({ members, currentUserId, onCigarClick, onDrink
       fetchAvatars();
     }
   }, [members, getAvatarUrl]);
+
+  // Chat message handler
+  const handleSendMessage = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!newMessage.trim()) return;
+
+    await sendMessage(newMessage);
+    setNewMessage("");
+  };
 
   // Find current user's position for floating menu
   const currentUserMember = members.find(m => m.user_id === currentUserId);
@@ -188,15 +207,6 @@ export const LoungeVisualizer = ({ members, currentUserId, onCigarClick, onDrink
                 >
                   <Cigarette size={12} className="mr-1" />
                   Cigars
-                </Button>
-                <Button
-                  variant={activeTab === 'chat' ? 'warrior' : 'ghost'}
-                  size="sm"
-                  onClick={() => setActiveTab('chat')}
-                  className="text-xs px-2 py-1"
-                >
-                  <MessageCircle size={12} className="mr-1" />
-                  Chat
                 </Button>
                 <Button
                   variant={activeTab === 'robot' ? 'warrior' : 'ghost'}
@@ -368,7 +378,66 @@ export const LoungeVisualizer = ({ members, currentUserId, onCigarClick, onDrink
             </div>
           )}
 
-          {/* Floating Cigar Game - positioned near current user */}
+          {/* Floating Chat Messages - left side */}
+          {messages.length > 0 && (
+            <div className="absolute left-4 top-4 bottom-20 w-72 z-40">
+              <div className="bg-black/80 backdrop-blur-md rounded-lg border border-warrior-gold/30 shadow-2xl h-full flex flex-col">
+                <div className="p-3 border-b border-warrior-gold/20">
+                  <h3 className="text-sm font-bold text-warrior-gold">Lounge Chat</h3>
+                </div>
+                <ScrollArea className="flex-1 p-3">
+                  <div className="space-y-2">
+                    {messages.slice(-10).map((message) => (
+                      <div key={message.id} className={`max-w-[85%] ${message.user_id === user?.id ? 'ml-auto' : 'mr-auto'}`}>
+                        <div className={`rounded-lg p-2 text-xs ${
+                          message.user_id === user?.id 
+                            ? 'bg-warrior-gold/20 text-foreground' 
+                            : 'bg-warrior-leather/30 text-foreground'
+                        }`}>
+                          {message.user_id !== user?.id && (
+                            <div className="text-xs text-warrior-gold mb-1 font-medium">
+                              {message.handle || 'Anonymous'}
+                            </div>
+                          )}
+                          <div>{message.message}</div>
+                          <div className="text-xs text-muted-foreground mt-1 opacity-70">
+                            {new Date(message.created_at).toLocaleTimeString([], { 
+                              hour: '2-digit', 
+                              minute: '2-digit' 
+                            })}
+                          </div>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                </ScrollArea>
+              </div>
+            </div>
+          )}
+
+          {/* Chat Input - bottom of screen */}
+          <div className="absolute bottom-4 left-1/2 transform -translate-x-1/2 w-full max-w-md z-40">
+            <form onSubmit={handleSendMessage} className="bg-black/80 backdrop-blur-md rounded-lg border border-warrior-gold/30 shadow-2xl p-3">
+              <div className="flex space-x-2">
+                <Input
+                  value={newMessage}
+                  onChange={(e) => setNewMessage(e.target.value)}
+                  placeholder="Type a message..."
+                  className="flex-1 bg-warrior-leather/20 border-warrior-gold/30 text-foreground placeholder:text-muted-foreground text-sm"
+                  maxLength={200}
+                />
+                <Button
+                  type="submit"
+                  size="sm"
+                  variant="warrior"
+                  disabled={!newMessage.trim()}
+                  className="px-3"
+                >
+                  <Send size={14} />
+                </Button>
+              </div>
+            </form>
+          </div>
           {showCigarGame && currentUserPosition && currentUserMember && (
             <div 
               className="absolute transform -translate-x-1/2 z-50"

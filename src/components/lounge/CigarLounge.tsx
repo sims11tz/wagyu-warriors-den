@@ -5,14 +5,12 @@ import { Badge } from "@/components/ui/badge";
 import { useAuth } from "@/contexts/AuthContext";
 import { useProfile } from "@/hooks/useProfile";
 import { useCigarLounges } from "@/hooks/useCigarLounges";
-import { useLoungeChat } from "@/hooks/useLoungeChat";
 import { CreateLoungeModal } from "./CreateLoungeModal";
-import { LoungeChat } from "./LoungeChat";
 import { LoungeVisualizer } from "./LoungeVisualizer";
 import { CigarGame } from "@/components/studio/CigarGame";
 import { YakuzaRobot } from "./YakuzaRobot";
 import { DrinkingGame } from "./DrinkingGame";
-import { Shield, Users, MessageCircle, Plus, LogOut, Cigarette, Wine, Bot } from "lucide-react";
+import { Shield, Users, Plus, LogOut, Cigarette, Wine } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 
 export const CigarLounge = () => {
@@ -32,8 +30,7 @@ export const CigarLounge = () => {
     updateDrinkProgress
   } = useCigarLounges();
   
-  const { messages, sendMessage } = useLoungeChat(currentLounge?.id);
-  const [activeTab, setActiveTab] = useState<'lounge' | 'game' | 'chat' | 'robot'>('lounge');
+  const [activeTab, setActiveTab] = useState<'lounge' | 'game' | 'robot'>('lounge');
 
   // Check if user needs age verification
   if (!profile?.age_verified) {
@@ -151,15 +148,6 @@ export const CigarLounge = () => {
                   Cigar Selection
                 </Button>
                 <Button
-                  variant={activeTab === 'chat' ? 'warrior' : 'ghost'}
-                  size="sm"
-                  onClick={() => setActiveTab('chat')}
-                  className="flex-1"
-                >
-                  <MessageCircle size={16} className="mr-2" />
-                  Chat
-                </Button>
-                <Button
                   variant={activeTab === 'robot' ? 'warrior' : 'ghost'}
                   size="sm"
                   onClick={() => setActiveTab('robot')}
@@ -170,7 +158,6 @@ export const CigarLounge = () => {
                 </Button>
               </div>
 
-              {/* Tab Content */}
               {/* Tab Content */}
               {activeTab === 'lounge' && (
                 <LoungeVisualizer 
@@ -183,6 +170,7 @@ export const CigarLounge = () => {
                   setActiveTab={setActiveTab}
                   onDrinkProgressUpdate={updateDrinkProgress}
                   onCigarStatusUpdate={updateCigarStatus}
+                  loungeId={currentLounge?.id}
                 />
               )}
 
@@ -191,14 +179,6 @@ export const CigarLounge = () => {
                   currentStatus={currentMember.cigar_status}
                   onStatusChange={(status, cigarId) => updateCigarStatus(status as any, cigarId)}
                   selectedCigarId={currentMember.selected_cigar_id || undefined}
-                />
-              )}
-
-              {activeTab === 'chat' && (
-                <LoungeChat
-                  loungeId={currentLounge?.id || null}
-                  isVisible={true}
-                  onToggle={() => {}}
                 />
               )}
 
