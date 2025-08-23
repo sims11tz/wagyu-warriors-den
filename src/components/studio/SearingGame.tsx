@@ -149,14 +149,24 @@ export const SearingGame: React.FC<SearingGameProps> = ({
   };
 
   const handleCanvasInteraction = useCallback((e: React.MouseEvent<HTMLCanvasElement>) => {
-    if (!gameStarted || gameEnded || currentSide === 'resting') return;
+    console.log('Canvas clicked!', { gameStarted, gameEnded, currentSide });
+    
+    if (!gameStarted || gameEnded || currentSide === 'resting') {
+      console.log('Interaction blocked:', { gameStarted, gameEnded, currentSide });
+      return;
+    }
     
     const canvas = canvasRef.current;
-    if (!canvas) return;
+    if (!canvas) {
+      console.log('No canvas found');
+      return;
+    }
 
     const rect = canvas.getBoundingClientRect();
     const x = e.clientX - rect.left;
     const y = e.clientY - rect.top;
+    
+    console.log('Click position:', { x, y });
     
     setPressPosition({ x, y });
     setIsPressed(true);
@@ -165,9 +175,12 @@ export const SearingGame: React.FC<SearingGameProps> = ({
     const currentZones = currentSide === 'side1' ? searZonesSide1 : searZonesSide2;
     const setCurrentZones = currentSide === 'side1' ? setSearZonesSide1 : setSearZonesSide2;
     
+    console.log('Current zones:', currentZones.length);
+    
     const updatedZones = currentZones.map(zone => {
       const distance = Math.sqrt(Math.pow(x - zone.x, 2) + Math.pow(y - zone.y, 2));
       if (distance < 40) { // Within searing radius
+        console.log('Hit zone!', { distance, zone, temperature });
         let newSeared = zone.seared;
         
         // Searing effectiveness based on temperature
@@ -179,11 +192,14 @@ export const SearingGame: React.FC<SearingGameProps> = ({
           // Too hot, risk of overcooking
           newSeared += 2;
           if (newSeared > 80) {
+            console.log('Zone overcooked!');
             return { ...zone, seared: 100, overcooked: true };
           }
         }
         
-        return { ...zone, seared: Math.min(100, newSeared) };
+        const updatedZone = { ...zone, seared: Math.min(100, newSeared) };
+        console.log('Zone updated:', { old: zone.seared, new: updatedZone.seared });
+        return updatedZone;
       }
       return zone;
     });
@@ -210,6 +226,8 @@ export const SearingGame: React.FC<SearingGameProps> = ({
     ctx.clearRect(0, 0, width, height);
 
     if (gameStarted) {
+      console.log('Drawing game state:', { currentSide, zonesCount: searZonesSide1.length });
+      
       // Draw meat base
       ctx.fillStyle = '#8B4513';
       ctx.fillRect(100, 130, 420, 210);
@@ -218,7 +236,9 @@ export const SearingGame: React.FC<SearingGameProps> = ({
       const currentZones = currentSide === 'side1' ? searZonesSide1 : 
                           currentSide === 'side2' ? searZonesSide2 : [];
 
-      currentZones.forEach(zone => {
+      console.log('Drawing zones:', currentZones.length);
+
+      currentZones.forEach((zone, index) => {
         // Zone background
         ctx.fillStyle = zone.overcooked ? '#8B0000' : 
                        zone.seared > 60 ? '#D2691E' : 
@@ -226,6 +246,11 @@ export const SearingGame: React.FC<SearingGameProps> = ({
         ctx.beginPath();
         ctx.arc(zone.x, zone.y, 35, 0, Math.PI * 2);
         ctx.fill();
+        
+        // Zone border for visibility
+        ctx.strokeStyle = '#654321';
+        ctx.lineWidth = 2;
+        ctx.stroke();
 
         // Searing progress indicator
         if (zone.seared > 0) {
@@ -234,10 +259,17 @@ export const SearingGame: React.FC<SearingGameProps> = ({
           ctx.arc(zone.x, zone.y, 35 * (zone.seared / 100), 0, Math.PI * 2);
           ctx.fill();
         }
+        
+        // Debug: show zone numbers
+        ctx.fillStyle = '#FFFFFF';
+        ctx.font = '12px Arial';
+        ctx.textAlign = 'center';
+        ctx.fillText(index.toString(), zone.x, zone.y + 4);
       });
 
       // Draw current press position
       if (isPressed && pressPosition) {
+        console.log('Drawing press effect at:', pressPosition);
         ctx.fillStyle = 'rgba(255, 215, 0, 0.6)';
         ctx.beginPath();
         ctx.arc(pressPosition.x, pressPosition.y, 45, 0, Math.PI * 2);
