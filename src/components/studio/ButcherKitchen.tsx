@@ -5,6 +5,7 @@ import { ChefHat, Play, RotateCcw, Save } from "lucide-react";
 import butcherKnife from "@/assets/butcher-knife.jpg";
 import wagyuHero from "@/assets/wagyu-hero.jpg";
 import { SlicingGame } from "./SlicingGame";
+import { SearingGame } from "./SearingGame";
 
 const primalCuts = [
   { id: "ribeye", name: "Ribeye A5", grade: "Prime", color: "warrior-ember" },
@@ -16,11 +17,26 @@ const primalCuts = [
 export const ButcherKitchen: React.FC = () => {
   const [selectedCut, setSelectedCut] = useState<string | null>(null);
   const [sliceScore, setSliceScore] = useState(0);
+  const [showSearingGame, setShowSearingGame] = useState(false);
   const [showSlicingGame, setShowSlicingGame] = useState(false);
   const [totalCuts, setTotalCuts] = useState(0);
+  const [searingCompleted, setSearingCompleted] = useState(false);
+  const [searingScore, setSearingScore] = useState(0);
+  const [searingTechnique, setSearingTechnique] = useState('');
 
   const handleStartSlicing = () => {
     if (!selectedCut) return;
+    setSearingCompleted(false);
+    setSearingScore(0);
+    setSearingTechnique('');
+    setShowSearingGame(true);
+  };
+
+  const handleSearingComplete = (score: number, technique: string) => {
+    setSearingScore(score);
+    setSearingTechnique(technique);
+    setSearingCompleted(true);
+    setShowSearingGame(false);
     setShowSlicingGame(true);
   };
 
@@ -32,6 +48,7 @@ export const ButcherKitchen: React.FC = () => {
 
   const handleCloseGame = () => {
     setShowSlicingGame(false);
+    setShowSearingGame(false);
   };
 
   return (
@@ -46,14 +63,23 @@ export const ButcherKitchen: React.FC = () => {
           </div>
         </div>
 
-        {sliceScore > 0 && (
-          <div className="mb-4 flex gap-2">
-            <Badge variant="outline" className="border-warrior-gold text-warrior-gold bg-warrior-gold/10">
-              Last Score: {sliceScore} points
-            </Badge>
-            <Badge variant="outline" className="border-warrior-ember text-warrior-ember bg-warrior-ember/10">
-              Cuts Made: {totalCuts}
-            </Badge>
+        {(sliceScore > 0 || searingScore > 0) && (
+          <div className="mb-4 flex gap-2 flex-wrap">
+            {searingScore > 0 && (
+              <Badge variant="outline" className="border-warrior-ember text-warrior-ember bg-warrior-ember/10">
+                Searing: {searingScore} ({searingTechnique})
+              </Badge>
+            )}
+            {sliceScore > 0 && (
+              <>
+                <Badge variant="outline" className="border-warrior-gold text-warrior-gold bg-warrior-gold/10">
+                  Slicing: {sliceScore} points
+                </Badge>
+                <Badge variant="outline" className="border-warrior-smoke text-warrior-smoke bg-warrior-smoke/10">
+                  Cuts: {totalCuts}
+                </Badge>
+              </>
+            )}
           </div>
         )}
       </div>
@@ -131,7 +157,7 @@ export const ButcherKitchen: React.FC = () => {
             className="w-full"
           >
             <Play size={16} />
-            Start Cut
+            Master the Cut
           </Button>
           
           <Button
@@ -141,6 +167,9 @@ export const ButcherKitchen: React.FC = () => {
               setSelectedCut(null);
               setSliceScore(0);
               setTotalCuts(0);
+              setSearingScore(0);
+              setSearingTechnique('');
+              setSearingCompleted(false);
             }}
             className="w-full"
           >
@@ -165,12 +194,23 @@ export const ButcherKitchen: React.FC = () => {
       <div className="warrior-glass rounded-xl p-6 border border-warrior-gold/20">
         <h4 className="font-semibold text-foreground mb-3">Master's Wisdom</h4>
         <div className="space-y-2 text-sm text-muted-foreground">
-          <p>• Cut against the grain for maximum tenderness</p>
-          <p>• Maintain consistent thickness for even cooking</p>
+          <p>• <span className="text-warrior-ember">Perfect the sear</span> - control heat and timing</p>
+          <p>• <span className="text-warrior-gold">Slice against the grain</span> for maximum tenderness</p>
           <p>• Let the knife do the work - apply gentle pressure</p>
-          <p>• Honor the marbling with precise cuts</p>
+          <p>• Honor the marbling with precise technique</p>
+          <p>• <span className="text-warrior-smoke">Rest the meat</span> to retain precious juices</p>
         </div>
       </div>
+
+      {/* Searing Game Modal */}
+      {showSearingGame && selectedCut && (
+        <SearingGame
+          cutType={selectedCut}
+          cutName={primalCuts.find(c => c.id === selectedCut)?.name || ''}
+          onComplete={handleSearingComplete}
+          onClose={handleCloseGame}
+        />
+      )}
 
       {/* Slicing Game Modal */}
       {showSlicingGame && selectedCut && (
