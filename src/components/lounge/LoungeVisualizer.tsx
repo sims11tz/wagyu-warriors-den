@@ -4,7 +4,8 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { useProfile } from "@/hooks/useProfile";
 import { supabase } from "@/integrations/supabase/client";
-import { Users, Cigarette, MessageCircle, Wine } from "lucide-react";
+import { Users, Cigarette, MessageCircle, Wine, X } from "lucide-react";
+import { DrinkingGame } from "./DrinkingGame";
 import yakuzaRobotWaitress from "@/assets/yakuza-robot-waitress.jpg";
 import yakuzaLoungeBackground from "@/assets/yakuza-lounge-background.jpg";
 import type { LoungeMember } from "@/hooks/useCigarLounges";
@@ -17,6 +18,7 @@ interface LoungeVisualizerProps {
   onBartenderClick?: () => void;
   activeTab?: string;
   setActiveTab?: (tab: 'lounge' | 'game' | 'chat' | 'robot') => void;
+  onDrinkProgressUpdate?: (progress: number) => void;
 }
 
 const getStatusEmoji = (status: string) => {
@@ -81,9 +83,10 @@ const seatPositions = [
   { x: 15, y: 65, rotation: 240 },  // Left
 ];
 
-export const LoungeVisualizer = ({ members, currentUserId, onCigarClick, onDrinkClick, onBartenderClick, activeTab, setActiveTab }: LoungeVisualizerProps) => {
+export const LoungeVisualizer = ({ members, currentUserId, onCigarClick, onDrinkClick, onBartenderClick, activeTab, setActiveTab, onDrinkProgressUpdate }: LoungeVisualizerProps) => {
   const { getAvatarUrl } = useProfile();
   const [memberAvatars, setMemberAvatars] = useState<Record<string, string | null>>({});
+  const [showDrinkingGame, setShowDrinkingGame] = useState(false);
 
   useEffect(() => {
     const fetchAvatars = async () => {
@@ -320,7 +323,7 @@ export const LoungeVisualizer = ({ members, currentUserId, onCigarClick, onDrink
                           isClickable ? 'cursor-pointer hover:bg-warrior-leather hover:scale-110 transition-all z-20' : ''
                         }`}
                         title={isClickable ? `Click to ${drink.status === 'Empty' ? 'order new drink' : 'continue drinking'}` : `Drink: ${drink.status}`}
-                        onClick={isClickable ? onDrinkClick : undefined}
+                        onClick={isClickable ? () => setShowDrinkingGame(true) : undefined}
                       >
                         <span className="text-sm drop-shadow-md">{drink.emoji}</span>
                       </div>
@@ -359,6 +362,48 @@ export const LoungeVisualizer = ({ members, currentUserId, onCigarClick, onDrink
               <Badge variant="outline" className="text-xs">
                 +{members.length - 6} more
               </Badge>
+            </div>
+          )}
+
+          {/* Floating Drinking Game - positioned below current user */}
+          {showDrinkingGame && currentUserPosition && currentUserMember?.drink_order_id && (
+            <div 
+              className="absolute transform -translate-x-1/2 z-50"
+              style={{ 
+                left: `${currentUserPosition.x}%`, 
+                top: `${Math.min(85, currentUserPosition.y + 35)}%` 
+              }}
+            >
+              <div className="bg-black/90 backdrop-blur-md rounded-lg border border-warrior-gold/30 shadow-2xl p-4 min-w-[300px]">
+                <div className="flex justify-between items-center mb-3">
+                  <h3 className="text-sm font-bold text-warrior-gold">Drinking Experience</h3>
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    onClick={() => setShowDrinkingGame(false)}
+                    className="h-6 w-6 p-0 text-warrior-gold hover:text-warrior-ember"
+                  >
+                    <X size={14} />
+                  </Button>
+                </div>
+                <DrinkingGame
+                  drinkName={`Drink #${currentUserMember.drink_order_id}`}
+                  drinkDifficulty="medium"
+                  drinkProgress={currentUserMember.drink_progress || 0}
+                  onProgressUpdate={(progress) => {
+                    if (onDrinkProgressUpdate) {
+                      onDrinkProgressUpdate(progress);
+                    }
+                  }}
+                  onFinished={() => {
+                    if (onDrinkProgressUpdate) {
+                      onDrinkProgressUpdate(100);
+                    }
+                    setShowDrinkingGame(false);
+                  }}
+                  isActive={!!currentUserMember.drink_order_id}
+                />
+              </div>
             </div>
           )}
         </div>

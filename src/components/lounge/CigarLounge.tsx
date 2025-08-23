@@ -171,6 +171,7 @@ export const CigarLounge = () => {
               </div>
 
               {/* Tab Content */}
+              {/* Tab Content */}
               {activeTab === 'lounge' && (
                 <LoungeVisualizer 
                   members={members} 
@@ -180,6 +181,7 @@ export const CigarLounge = () => {
                   onBartenderClick={() => setActiveTab('robot')}
                   activeTab={activeTab}
                   setActiveTab={setActiveTab}
+                  onDrinkProgressUpdate={updateDrinkProgress}
                 />
               )}
 
