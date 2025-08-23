@@ -182,6 +182,7 @@ export const CigarLounge = () => {
                   activeTab={activeTab}
                   setActiveTab={setActiveTab}
                   onDrinkProgressUpdate={updateDrinkProgress}
+                  onCigarStatusUpdate={updateCigarStatus}
                 />
               )}
 

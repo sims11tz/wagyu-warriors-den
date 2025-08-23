@@ -6,6 +6,7 @@ import { useProfile } from "@/hooks/useProfile";
 import { supabase } from "@/integrations/supabase/client";
 import { Users, Cigarette, MessageCircle, Wine, X } from "lucide-react";
 import { DrinkingGame } from "./DrinkingGame";
+import { CigarGame } from "@/components/studio/CigarGame";
 import yakuzaRobotWaitress from "@/assets/yakuza-robot-waitress.jpg";
 import yakuzaLoungeBackground from "@/assets/yakuza-lounge-background.jpg";
 import type { LoungeMember } from "@/hooks/useCigarLounges";
@@ -19,6 +20,7 @@ interface LoungeVisualizerProps {
   activeTab?: string;
   setActiveTab?: (tab: 'lounge' | 'game' | 'chat' | 'robot') => void;
   onDrinkProgressUpdate?: (progress: number) => void;
+  onCigarStatusUpdate?: (status: string, cigarId?: number) => void;
 }
 
 const getStatusEmoji = (status: string) => {
@@ -83,10 +85,11 @@ const seatPositions = [
   { x: 15, y: 65, rotation: 240 },  // Left
 ];
 
-export const LoungeVisualizer = ({ members, currentUserId, onCigarClick, onDrinkClick, onBartenderClick, activeTab, setActiveTab, onDrinkProgressUpdate }: LoungeVisualizerProps) => {
+export const LoungeVisualizer = ({ members, currentUserId, onCigarClick, onDrinkClick, onBartenderClick, activeTab, setActiveTab, onDrinkProgressUpdate, onCigarStatusUpdate }: LoungeVisualizerProps) => {
   const { getAvatarUrl } = useProfile();
   const [memberAvatars, setMemberAvatars] = useState<Record<string, string | null>>({});
   const [showDrinkingGame, setShowDrinkingGame] = useState(false);
+  const [showCigarGame, setShowCigarGame] = useState(false);
 
   useEffect(() => {
     const fetchAvatars = async () => {
@@ -305,7 +308,7 @@ export const LoungeVisualizer = ({ members, currentUserId, onCigarClick, onDrink
                           isClickable ? 'cursor-pointer hover:bg-warrior-leather hover:scale-110 transition-all z-20' : ''
                         }`}
                         title={isClickable ? `Click to ${cigar.status === 'Smoking' ? 'continue smoking' : 'manage cigar'}` : `Cigar: ${cigar.status}`}
-                        onClick={isClickable ? onCigarClick : undefined}
+                        onClick={isClickable ? () => setShowCigarGame(true) : undefined}
                       >
                         <span className="text-sm drop-shadow-md">{cigar.emoji}</span>
                       </div>
@@ -365,7 +368,45 @@ export const LoungeVisualizer = ({ members, currentUserId, onCigarClick, onDrink
             </div>
           )}
 
-          {/* Floating Drinking Game - positioned below current user */}
+          {/* Floating Cigar Game - positioned near current user */}
+          {showCigarGame && currentUserPosition && currentUserMember && (
+            <div 
+              className="absolute transform -translate-x-1/2 z-50"
+              style={{ 
+                left: `${currentUserPosition.x}%`, 
+                top: currentUserPosition.y > 70 
+                  ? `${Math.max(5, currentUserPosition.y - 55)}%`  // Show above for bottom seats
+                  : `${Math.min(65, currentUserPosition.y + 25)}%`  // Show below for top seats
+              }}
+            >
+              <div className="bg-black/90 backdrop-blur-md rounded-lg border border-warrior-gold/30 shadow-2xl p-4 min-w-[320px] max-w-[400px]">
+                <div className="flex justify-between items-center mb-3">
+                  <h3 className="text-sm font-bold text-warrior-gold">Cigar Experience</h3>
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    onClick={() => setShowCigarGame(false)}
+                    className="h-6 w-6 p-0 text-warrior-gold hover:text-warrior-ember"
+                  >
+                    <X size={14} />
+                  </Button>
+                </div>
+                <div className="scale-90 origin-top">
+                  <CigarGame
+                    currentStatus={currentUserMember.cigar_status}
+                    onStatusChange={(status, cigarId) => {
+                      if (onCigarStatusUpdate) {
+                        onCigarStatusUpdate(status, cigarId);
+                      }
+                    }}
+                    selectedCigarId={currentUserMember.selected_cigar_id || undefined}
+                  />
+                </div>
+              </div>
+            </div>
+          )}
+
+          {/* Floating Drinking Game - positioned near current user */}
           {showDrinkingGame && currentUserPosition && currentUserMember?.drink_order_id && (
             <div 
               className="absolute transform -translate-x-1/2 z-50"
