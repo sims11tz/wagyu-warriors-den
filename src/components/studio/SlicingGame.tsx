@@ -2,6 +2,7 @@ import { useRef, useEffect, useState, useCallback } from 'react';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { X, Trophy, Timer, Target } from 'lucide-react';
+import wagyuCuttingBoard from '@/assets/wagyu-cutting-board.jpg';
 
 interface SlicingGameProps {
   cutType: string;
@@ -18,10 +19,11 @@ interface SliceLine {
   quality: 'perfect' | 'good' | 'poor';
 }
 
-interface MarblingPattern {
+interface CutEffect {
   x: number;
   y: number;
-  size: number;
+  opacity: number;
+  timestamp: number;
 }
 
 export const SlicingGame: React.FC<SlicingGameProps> = ({
@@ -37,8 +39,9 @@ export const SlicingGame: React.FC<SlicingGameProps> = ({
   const [score, setScore] = useState(0);
   const [gameStarted, setGameStarted] = useState(false);
   const [gameEnded, setGameEnded] = useState(false);
-  const [marblingPattern, setMarblingPattern] = useState<MarblingPattern[]>([]);
+  const [cutEffects, setCutEffects] = useState<CutEffect[]>([]);
   const [previewLine, setPreviewLine] = useState<{ x1: number; y1: number; x2: number; y2: number } | null>(null);
+  const imageRef = useRef<HTMLImageElement>(null);
 
   // Game timer
   useEffect(() => {
@@ -73,78 +76,88 @@ export const SlicingGame: React.FC<SlicingGameProps> = ({
     return (perfectCuts * 100) + (goodCuts * 60) + (poorCuts * 20);
   };
 
-  // Generate static marbling pattern on game start
-  const generateMarblingPattern = useCallback((width: number, height: number) => {
-    const pattern: MarblingPattern[] = [];
-    for (let i = 0; i < 8; i++) {
-      pattern.push({
-        x: 80 + Math.random() * (width - 160),
-        y: 80 + Math.random() * (height - 160),
-        size: 20 + Math.random() * 30,
-      });
-    }
-    setMarblingPattern(pattern);
+  // Add cut effect animation
+  const addCutEffect = useCallback((x: number, y: number) => {
+    const effect: CutEffect = {
+      x,
+      y,
+      opacity: 1,
+      timestamp: Date.now()
+    };
+    setCutEffects(prev => [...prev, effect]);
+    
+    // Remove effect after animation
+    setTimeout(() => {
+      setCutEffects(prev => prev.filter(e => e.timestamp !== effect.timestamp));
+    }, 1000);
   }, []);
 
-  const drawMeat = useCallback((ctx: CanvasRenderingContext2D, width: number, height: number) => {
-    // Draw meat background
-    const gradient = ctx.createLinearGradient(0, 0, width, height);
-    gradient.addColorStop(0, '#8B4513');
-    gradient.addColorStop(0.3, '#CD853F');
-    gradient.addColorStop(0.7, '#A0522D');
-    gradient.addColorStop(1, '#8B4513');
-    
-    ctx.fillStyle = gradient;
-    ctx.fillRect(50, 50, width - 100, height - 100);
-    
-    // Draw static marbling pattern only if it exists
-    if (marblingPattern.length > 0) {
-      ctx.strokeStyle = '#F5DEB3';
-      ctx.lineWidth = 2;
-      ctx.globalAlpha = 0.6;
+  const drawMeatImage = useCallback((ctx: CanvasRenderingContext2D, width: number, height: number) => {
+    const img = imageRef.current;
+    if (img && img.complete) {
+      // Calculate dimensions to fit the meat in the center area
+      const padding = 40;
+      const drawWidth = width - (padding * 2);
+      const drawHeight = height - (padding * 2);
       
-      marblingPattern.forEach(({ x, y, size }) => {
-        ctx.beginPath();
-        ctx.arc(x, y, size, 0, Math.PI * 2);
-        ctx.stroke();
-      });
+      // Draw the wagyu image
+      ctx.drawImage(img, padding, padding, drawWidth, drawHeight);
       
-      ctx.globalAlpha = 1;
+      // Add subtle overlay to make cuts more visible
+      ctx.fillStyle = 'rgba(0, 0, 0, 0.1)';
+      ctx.fillRect(padding, padding, drawWidth, drawHeight);
     }
-  }, [marblingPattern]);
+  }, []);
 
   const drawGuideLines = useCallback((ctx: CanvasRenderingContext2D, width: number, height: number) => {
     ctx.strokeStyle = '#FFD700';
-    ctx.lineWidth = 1;
-    ctx.setLineDash([5, 5]);
-    ctx.globalAlpha = 0.5;
+    ctx.lineWidth = 2;
+    ctx.setLineDash([8, 8]);
+    ctx.globalAlpha = 0.6;
+    ctx.shadowColor = '#000000';
+    ctx.shadowBlur = 2;
     
-    // Draw suggested cut lines
-    const numLines = 6;
-    const spacing = (height - 100) / (numLines + 1);
+    // Draw suggested cut lines for steaks - vertical cuts
+    const numLines = 5;
+    const padding = 40;
+    const meatWidth = width - (padding * 2);
+    const spacing = meatWidth / (numLines + 1);
     
     for (let i = 1; i <= numLines; i++) {
-      const y = 50 + spacing * i;
+      const x = padding + spacing * i;
       ctx.beginPath();
-      ctx.moveTo(60, y);
-      ctx.lineTo(width - 60, y);
+      ctx.moveTo(x, padding + 20);
+      ctx.lineTo(x, height - padding - 20);
       ctx.stroke();
     }
     
     ctx.setLineDash([]);
     ctx.globalAlpha = 1;
+    ctx.shadowBlur = 0;
   }, []);
 
   const drawCuts = useCallback((ctx: CanvasRenderingContext2D) => {
     cuts.forEach((cut) => {
+      // Draw cut shadow for depth
+      ctx.strokeStyle = 'rgba(0, 0, 0, 0.8)';
+      ctx.lineWidth = 6;
+      ctx.beginPath();
+      ctx.moveTo(cut.x1 + 2, cut.y1 + 2);
+      ctx.lineTo(cut.x2 + 2, cut.y2 + 2);
+      ctx.stroke();
+      
+      // Draw actual cut
       ctx.strokeStyle = 
-        cut.quality === 'perfect' ? '#00FF00' :
-        cut.quality === 'good' ? '#FFA500' : '#FF0000';
-      ctx.lineWidth = 3;
+        cut.quality === 'perfect' ? '#00FF88' :
+        cut.quality === 'good' ? '#FFB84D' : '#FF4444';
+      ctx.lineWidth = 4;
+      ctx.shadowColor = ctx.strokeStyle;
+      ctx.shadowBlur = 8;
       ctx.beginPath();
       ctx.moveTo(cut.x1, cut.y1);
       ctx.lineTo(cut.x2, cut.y2);
       ctx.stroke();
+      ctx.shadowBlur = 0;
     });
   }, [cuts]);
 
@@ -152,16 +165,48 @@ export const SlicingGame: React.FC<SlicingGameProps> = ({
     if (!previewLine) return;
     
     ctx.strokeStyle = '#FFFFFF';
-    ctx.lineWidth = 2;
-    ctx.setLineDash([3, 3]);
-    ctx.globalAlpha = 0.8;
+    ctx.lineWidth = 3;
+    ctx.setLineDash([6, 6]);
+    ctx.globalAlpha = 0.9;
+    ctx.shadowColor = '#000000';
+    ctx.shadowBlur = 4;
     ctx.beginPath();
     ctx.moveTo(previewLine.x1, previewLine.y1);
     ctx.lineTo(previewLine.x2, previewLine.y2);
     ctx.stroke();
     ctx.setLineDash([]);
     ctx.globalAlpha = 1;
+    ctx.shadowBlur = 0;
   }, [previewLine]);
+  
+  const drawCutEffects = useCallback((ctx: CanvasRenderingContext2D) => {
+    const now = Date.now();
+    cutEffects.forEach((effect) => {
+      const age = now - effect.timestamp;
+      const progress = age / 1000; // 1 second animation
+      const opacity = Math.max(0, 1 - progress);
+      const size = 10 + (progress * 20);
+      
+      if (opacity > 0) {
+        ctx.fillStyle = `rgba(255, 215, 0, ${opacity})`;
+        ctx.beginPath();
+        ctx.arc(effect.x, effect.y, size, 0, Math.PI * 2);
+        ctx.fill();
+        
+        // Add sparkle effect
+        for (let i = 0; i < 3; i++) {
+          const angle = (i * Math.PI * 2) / 3 + progress * Math.PI * 2;
+          const sparkleX = effect.x + Math.cos(angle) * size * 1.5;
+          const sparkleY = effect.y + Math.sin(angle) * size * 1.5;
+          
+          ctx.fillStyle = `rgba(255, 255, 255, ${opacity * 0.8})`;
+          ctx.beginPath();
+          ctx.arc(sparkleX, sparkleY, 2, 0, Math.PI * 2);
+          ctx.fill();
+        }
+      }
+    });
+  }, [cutEffects]);
 
   useEffect(() => {
     const canvas = canvasRef.current;
@@ -177,14 +222,15 @@ export const SlicingGame: React.FC<SlicingGameProps> = ({
     
     // Always draw meat background when game is started
     if (gameStarted) {
-      drawMeat(ctx, width, height);
+      drawMeatImage(ctx, width, height);
       if (!gameEnded) {
         drawGuideLines(ctx, width, height);
       }
       drawCuts(ctx);
       drawPreviewLine(ctx);
+      drawCutEffects(ctx);
     }
-  }, [gameStarted, cuts, gameEnded, previewLine, marblingPattern, drawMeat, drawGuideLines, drawCuts, drawPreviewLine]);
+  }, [gameStarted, cuts, gameEnded, previewLine, cutEffects, drawMeatImage, drawGuideLines, drawCuts, drawPreviewLine, drawCutEffects]);
 
   const handleMouseDown = (e: React.MouseEvent<HTMLCanvasElement>) => {
     if (!gameStarted || gameEnded) return;
@@ -215,14 +261,17 @@ export const SlicingGame: React.FC<SlicingGameProps> = ({
       const endX = upEvent.clientX - rect.left;
       const endY = upEvent.clientY - rect.top;
       
-      // Evaluate cut quality
+      // Evaluate cut quality - favor vertical cuts for steaks
       const cutLength = Math.sqrt(Math.pow(endX - startX, 2) + Math.pow(endY - startY, 2));
       const angle = Math.abs(Math.atan2(endY - startY, endX - startX));
       
+      // For wagyu steaks, we want more vertical cuts (angle closer to π/2)
+      const verticalAngle = Math.abs(angle - Math.PI/2);
+      
       let quality: 'perfect' | 'good' | 'poor';
-      if (cutLength > 100 && Math.abs(angle) < 0.2) {
+      if (cutLength > 120 && verticalAngle < 0.3) {
         quality = 'perfect';
-      } else if (cutLength > 60 && Math.abs(angle) < 0.5) {
+      } else if (cutLength > 80 && verticalAngle < 0.6) {
         quality = 'good';
       } else {
         quality = 'poor';
@@ -235,6 +284,11 @@ export const SlicingGame: React.FC<SlicingGameProps> = ({
         y2: endY,
         quality,
       };
+
+      // Add cut effect at midpoint of the cut
+      const midX = (startX + endX) / 2;
+      const midY = (startY + endY) / 2;
+      addCutEffect(midX, midY);
 
       setCuts(prev => [...prev, newCut]);
       setScore(prev => prev + (quality === 'perfect' ? 100 : quality === 'good' ? 60 : 20));
@@ -250,16 +304,13 @@ export const SlicingGame: React.FC<SlicingGameProps> = ({
   };
 
   const startGame = () => {
-    const canvas = canvasRef.current;
-    if (canvas) {
-      generateMarblingPattern(canvas.width, canvas.height);
-    }
     setGameStarted(true);
     setTimeLeft(30);
     setCuts([]);
     setScore(0);
     setGameEnded(false);
     setPreviewLine(null);
+    setCutEffects([]);
   };
 
   const perfectCuts = cuts.filter(cut => cut.quality === 'perfect').length;
@@ -283,14 +334,15 @@ export const SlicingGame: React.FC<SlicingGameProps> = ({
             <div className="warrior-glass rounded-xl p-6 border border-warrior-gold/20">
               <Trophy className="w-16 h-16 text-warrior-gold mx-auto mb-4" />
               <h3 className="text-xl font-semibold text-foreground mb-2">Master the Blade</h3>
-              <p className="text-muted-foreground mb-4">
-                Slice the {cutName} with precision! Follow the golden guide lines for perfect cuts.
-              </p>
-              <div className="space-y-2 text-sm text-warrior-light">
-                <p>• <span className="text-green-400">Perfect cuts:</span> Long, straight lines = 100 points</p>
-                <p>• <span className="text-orange-400">Good cuts:</span> Decent lines = 60 points</p>
-                <p>• <span className="text-red-400">Poor cuts:</span> Short or angled = 20 points</p>
-              </div>
+                <p className="text-muted-foreground mb-4">
+                  Slice the premium {cutName} with precision! Make clean vertical cuts following the guide lines to score maximum points.
+                </p>
+                <div className="space-y-2 text-sm text-warrior-light">
+                  <p>• <span className="text-green-400">Perfect cuts:</span> Long, straight vertical slices = 100 points</p>
+                  <p>• <span className="text-orange-400">Good cuts:</span> Decent vertical lines = 60 points</p>
+                  <p>• <span className="text-red-400">Poor cuts:</span> Short or crooked cuts = 20 points</p>
+                  <p className="mt-2 text-warrior-gold italic">💡 Tip: Slice across the grain for tender wagyu steaks!</p>
+                </div>
             </div>
             <Button variant="warrior" size="lg" onClick={startGame} className="w-full">
               Start Slicing Challenge
@@ -316,10 +368,35 @@ export const SlicingGame: React.FC<SlicingGameProps> = ({
             </div>
 
             <div className="relative mb-4">
+              {/* Hidden image for canvas drawing */}
+              <img 
+                ref={imageRef} 
+                src={wagyuCuttingBoard} 
+                alt="Wagyu meat" 
+                style={{ display: 'none' }} 
+                onLoad={() => {
+                  // Force canvas redraw when image loads
+                  const canvas = canvasRef.current;
+                  if (canvas && gameStarted) {
+                    const ctx = canvas.getContext('2d');
+                    if (ctx) {
+                      const { width, height } = canvas;
+                      ctx.clearRect(0, 0, width, height);
+                      drawMeatImage(ctx, width, height);
+                      if (!gameEnded) {
+                        drawGuideLines(ctx, width, height);
+                      }
+                      drawCuts(ctx);
+                      drawPreviewLine(ctx);
+                      drawCutEffects(ctx);
+                    }
+                  }
+                }}
+              />
               <canvas
                 ref={canvasRef}
-                width={500}
-                height={300}
+                width={600}
+                height={400}
                 className="w-full border-2 border-warrior-gold/30 rounded-lg cursor-crosshair bg-warrior-dark"
                 onMouseDown={handleMouseDown}
                 style={{
@@ -344,7 +421,7 @@ export const SlicingGame: React.FC<SlicingGameProps> = ({
 
             <div className="text-center">
               <p className="text-sm text-muted-foreground">
-                Click and drag to slice the meat. Follow the golden guide lines for best results!
+                Click and drag vertically to slice the wagyu. Follow the golden guide lines for perfect steaks!
               </p>
             </div>
           </>
