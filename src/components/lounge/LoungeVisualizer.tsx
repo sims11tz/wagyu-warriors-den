@@ -4,6 +4,7 @@ import { Badge } from "@/components/ui/badge";
 import { useProfile } from "@/hooks/useProfile";
 import { supabase } from "@/integrations/supabase/client";
 import yakuzaRobotWaitress from "@/assets/yakuza-robot-waitress.jpg";
+import yakuzaLoungeBackground from "@/assets/yakuza-lounge-background.jpg";
 import type { LoungeMember } from "@/hooks/useCigarLounges";
 
 interface LoungeVisualizerProps {
@@ -129,12 +130,25 @@ export const LoungeVisualizer = ({ members, currentUserId, onCigarClick, onDrink
   }
 
   return (
-    <Card className="warrior-glass border-warrior-gold/20">
+    <Card className="warrior-glass border-warrior-gold/20 overflow-hidden">
       <CardContent className="p-6">
-        <div className="relative w-full" style={{ aspectRatio: '1', minHeight: '300px' }}>
+        <div 
+          className="relative w-full rounded-lg overflow-hidden"
+          style={{ 
+            aspectRatio: '1', 
+            minHeight: '400px',
+            backgroundImage: `url(${yakuzaLoungeBackground})`,
+            backgroundSize: 'cover',
+            backgroundPosition: 'center',
+            backgroundRepeat: 'no-repeat'
+          }}
+        >
+          {/* Dark overlay for better contrast */}
+          <div className="absolute inset-0 bg-black/30 backdrop-blur-[0.5px]"></div>
+          
           {/* Central Table */}
           <div 
-            className="absolute bg-warrior-leather/30 rounded-full border-2 border-warrior-gold/40"
+            className="absolute bg-warrior-leather/40 rounded-full border-2 border-warrior-gold/60 backdrop-blur-sm shadow-2xl"
             style={{
               left: '30%',
               top: '30%',
@@ -144,21 +158,21 @@ export const LoungeVisualizer = ({ members, currentUserId, onCigarClick, onDrink
           >
             <div className="flex items-center justify-center h-full">
               <div className="text-center">
-                <div className="text-2xl mb-1">🎯</div>
-                <div className="text-xs text-warrior-gold font-medium">Lounge</div>
+                <div className="text-3xl mb-2 drop-shadow-lg">🎯</div>
+                <div className="text-sm text-warrior-gold font-bold drop-shadow-md">Secret Lounge</div>
               </div>
             </div>
           </div>
 
           {/* Yakuza Robot Bartender */}
           <div 
-            className="absolute transform -translate-x-1/2 -translate-y-1/2 cursor-pointer hover:scale-110 transition-all"
+            className="absolute transform -translate-x-1/2 -translate-y-1/2 cursor-pointer hover:scale-110 transition-all z-10"
             style={{ left: '85%', top: '50%' }}
             onClick={onBartenderClick}
             title="Click to order drinks from the bartender"
           >
             <div className="relative">
-              <div className="w-16 h-16 rounded-full border-2 border-warrior-ember bg-warrior-ember/20 flex items-center justify-center overflow-hidden hover:border-warrior-ember/80 transition-colors">
+              <div className="w-20 h-20 rounded-full border-3 border-warrior-ember bg-warrior-ember/30 flex items-center justify-center overflow-hidden hover:border-warrior-ember shadow-2xl backdrop-blur-sm transition-all">
                 <img 
                   src={yakuzaRobotWaitress} 
                   alt="Yakuza Robot Waitress" 
@@ -166,14 +180,14 @@ export const LoungeVisualizer = ({ members, currentUserId, onCigarClick, onDrink
                 />
               </div>
               <div className="absolute -top-1 -right-1">
-                <div className="w-4 h-4 rounded-full bg-green-500 border border-background flex items-center justify-center">
+                <div className="w-5 h-5 rounded-full bg-green-500 border-2 border-background flex items-center justify-center shadow-lg">
                   <div className="w-2 h-2 rounded-full bg-white animate-pulse"></div>
                 </div>
               </div>
-              <div className="absolute top-full mt-1 left-1/2 transform -translate-x-1/2 min-w-max">
-                <div className="text-center">
-                  <div className="text-xs font-medium text-warrior-ember">Bartender</div>
-                  <Badge variant="outline" className="text-xs mt-1 bg-warrior-ember/10 text-warrior-ember">
+              <div className="absolute top-full mt-2 left-1/2 transform -translate-x-1/2 min-w-max">
+                <div className="text-center bg-black/60 backdrop-blur-sm rounded-lg px-2 py-1 border border-warrior-ember/30">
+                  <div className="text-xs font-bold text-warrior-ember drop-shadow-md">Bartender</div>
+                  <Badge variant="outline" className="text-xs mt-1 bg-warrior-ember/20 text-warrior-ember border-warrior-ember/50">
                     Ready to Serve
                   </Badge>
                 </div>
@@ -190,7 +204,7 @@ export const LoungeVisualizer = ({ members, currentUserId, onCigarClick, onDrink
             return (
               <div
                 key={member.id}
-                className="absolute transform -translate-x-1/2 -translate-y-1/2"
+                className="absolute transform -translate-x-1/2 -translate-y-1/2 z-10"
                 style={{
                   left: `${position.x}%`,
                   top: `${position.y}%`,
@@ -199,10 +213,10 @@ export const LoungeVisualizer = ({ members, currentUserId, onCigarClick, onDrink
                 {/* Seat */}
                 <div className="relative">
                   <div 
-                    className={`w-16 h-16 rounded-full border-2 flex items-center justify-center transition-all overflow-hidden ${
+                    className={`w-18 h-18 rounded-full border-3 flex items-center justify-center transition-all overflow-hidden shadow-2xl backdrop-blur-sm ${
                       isCurrentUser 
-                        ? 'border-warrior-gold bg-warrior-gold/20' 
-                        : 'border-warrior-leather/50 bg-warrior-leather/10'
+                        ? 'border-warrior-gold bg-warrior-gold/30' 
+                        : 'border-warrior-leather/70 bg-warrior-leather/20'
                     }`}
                   >
                     {avatar ? (
@@ -212,7 +226,7 @@ export const LoungeVisualizer = ({ members, currentUserId, onCigarClick, onDrink
                         className="w-full h-full object-cover rounded-full"
                       />
                     ) : (
-                      <div className="w-12 h-12 rounded-full bg-warrior-leather/30 flex items-center justify-center text-warrior-gold text-lg font-bold">
+                      <div className="w-14 h-14 rounded-full bg-warrior-leather/40 flex items-center justify-center text-warrior-gold text-xl font-bold drop-shadow-lg">
                         {(member.handle || 'A')[0].toUpperCase()}
                       </div>
                     )}
@@ -225,13 +239,13 @@ export const LoungeVisualizer = ({ members, currentUserId, onCigarClick, onDrink
                     const isClickable = isCurrentUser && onCigarClick;
                     return (
                       <div 
-                        className={`absolute -right-6 top-2 bg-warrior-leather/80 rounded-full p-1 border border-warrior-gold/30 ${
-                          isClickable ? 'cursor-pointer hover:bg-warrior-leather hover:scale-110 transition-all' : ''
+                        className={`absolute -right-7 top-2 bg-warrior-leather/90 rounded-full p-2 border border-warrior-gold/50 shadow-lg backdrop-blur-sm ${
+                          isClickable ? 'cursor-pointer hover:bg-warrior-leather hover:scale-110 transition-all z-20' : ''
                         }`}
                         title={isClickable ? `Click to ${cigar.status === 'Smoking' ? 'continue smoking' : 'manage cigar'}` : `Cigar: ${cigar.status}`}
                         onClick={isClickable ? onCigarClick : undefined}
                       >
-                        <span className="text-sm">{cigar.emoji}</span>
+                        <span className="text-lg drop-shadow-md">{cigar.emoji}</span>
                       </div>
                     );
                   })()}
@@ -243,33 +257,33 @@ export const LoungeVisualizer = ({ members, currentUserId, onCigarClick, onDrink
                     const isClickable = isCurrentUser && onDrinkClick;
                     return (
                       <div 
-                        className={`absolute -left-6 top-2 bg-warrior-leather/80 rounded-full p-1 border border-warrior-gold/30 ${drink.opacity} ${
-                          isClickable ? 'cursor-pointer hover:bg-warrior-leather hover:scale-110 transition-all' : ''
+                        className={`absolute -left-7 top-2 bg-warrior-leather/90 rounded-full p-2 border border-warrior-gold/50 shadow-lg backdrop-blur-sm ${drink.opacity} ${
+                          isClickable ? 'cursor-pointer hover:bg-warrior-leather hover:scale-110 transition-all z-20' : ''
                         }`}
                         title={isClickable ? `Click to ${drink.status === 'Empty' ? 'order new drink' : 'continue drinking'}` : `Drink: ${drink.status}`}
                         onClick={isClickable ? onDrinkClick : undefined}
                       >
-                        <span className="text-sm">{drink.emoji}</span>
+                        <span className="text-lg drop-shadow-md">{drink.emoji}</span>
                       </div>
                     );
                   })()}
 
                   {/* Status Indicator */}
                   <div className="absolute -top-2 -right-2">
-                    <div className={`w-8 h-8 rounded-full border-2 border-background flex items-center justify-center text-sm ${getStatusColor(member.cigar_status)}`}>
-                      {getStatusEmoji(member.cigar_status)}
+                    <div className={`w-10 h-10 rounded-full border-2 border-background flex items-center justify-center text-sm shadow-xl backdrop-blur-sm ${getStatusColor(member.cigar_status)}`}>
+                      <span className="drop-shadow-md">{getStatusEmoji(member.cigar_status)}</span>
                     </div>
                   </div>
 
                   {/* Member Info */}
-                  <div className="absolute top-full mt-2 left-1/2 transform -translate-x-1/2 min-w-max">
-                    <div className="text-center">
-                      <div className={`text-xs font-medium ${isCurrentUser ? 'text-warrior-gold' : 'text-foreground'}`}>
+                  <div className="absolute top-full mt-3 left-1/2 transform -translate-x-1/2 min-w-max">
+                    <div className="text-center bg-black/60 backdrop-blur-sm rounded-lg px-3 py-2 border border-warrior-gold/30 shadow-xl">
+                      <div className={`text-sm font-bold drop-shadow-md ${isCurrentUser ? 'text-warrior-gold' : 'text-foreground'}`}>
                         {isCurrentUser ? 'You' : (member.handle || 'Anonymous')}
                       </div>
                       <Badge 
                         variant="outline" 
-                        className={`text-xs mt-1 ${getStatusColor(member.cigar_status)}`}
+                        className={`text-xs mt-1 ${getStatusColor(member.cigar_status)} border-opacity-70`}
                       >
                         {member.cigar_status}
                       </Badge>
