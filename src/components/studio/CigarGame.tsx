@@ -54,6 +54,9 @@ export const CigarGame = ({ currentStatus, onStatusChange, selectedCigarId }: Ci
   const [cutPosition, setCutPosition] = useState(50);
   const [lightingProgress, setLightingProgress] = useState(0);
   const [puffCount, setPuffCount] = useState(0);
+  const [lighterPosition, setLighterPosition] = useState({ x: 50, y: 50 });
+  const [mousePosition, setMousePosition] = useState({ x: 0, y: 0 });
+  const [isLighterActive, setIsLighterActive] = useState(false);
 
   const selectedCigar = cigarOptions.find(c => c.id === selectedCigarId);
 
@@ -106,32 +109,96 @@ export const CigarGame = ({ currentStatus, onStatusChange, selectedCigarId }: Ci
     }
   };
 
-  // Lighting Game
-  const handleLighting = () => {
+  // Lighting Game - Interactive lighter tracking
+  const handleStartLighting = () => {
     if (gameState === 'idle') {
       setGameState('playing');
       setLightingProgress(0);
+      setIsLighterActive(true);
+      setLighterPosition({ x: 50, y: 50 });
       
-      const interval = setInterval(() => {
-        setLightingProgress(prev => {
-          if (prev >= 100) {
-            clearInterval(interval);
+      let steadyTime = 0;
+      const targetTime = 3000; // 3 seconds of steady holding
+      
+      const gameLoop = setInterval(() => {
+        // Move lighter randomly every 200ms
+        setLighterPosition(prev => ({
+          x: Math.max(10, Math.min(90, prev.x + (Math.random() - 0.5) * 20)),
+          y: Math.max(10, Math.min(90, prev.y + (Math.random() - 0.5) * 20))
+        }));
+        
+        // Check if mouse is close enough to lighter
+        const distance = Math.sqrt(
+          Math.pow(mousePosition.x - lighterPosition.x, 2) + 
+          Math.pow(mousePosition.y - lighterPosition.y, 2)
+        );
+        
+        if (distance < 8) { // Within 8% of the game area
+          steadyTime += 200;
+          setLightingProgress((steadyTime / targetTime) * 100);
+          
+          if (steadyTime >= targetTime) {
+            clearInterval(gameLoop);
             setGameState('success');
+            setIsLighterActive(false);
             setTimeout(() => {
               onStatusChange('smoking');
               setGameState('idle');
               setPuffCount(0);
               toast({
                 title: "Perfectly Lit!",
-                description: "Your cigar is burning evenly. Enjoy!"
+                description: "Your steady hand lit the cigar beautifully!"
               });
             }, 1500);
-            return 100;
           }
-          return prev + 1;
-        });
-      }, 100);
+        } else {
+          // Lose progress if not keeping flame steady
+          steadyTime = Math.max(0, steadyTime - 100);
+          setLightingProgress((steadyTime / targetTime) * 100);
+          
+          // Fail if they can't maintain it
+          if (lightingProgress > 50 && steadyTime <= 0) {
+            clearInterval(gameLoop);
+            setGameState('fail');
+            setIsLighterActive(false);
+            setTimeout(() => {
+              setGameState('idle');
+              toast({
+                title: "Try Again",
+                description: "Keep the flame steady on the cigar tip!",
+                variant: "destructive"
+              });
+            }, 1500);
+          }
+        }
+      }, 200);
+      
+      // Auto-fail after 15 seconds
+      const timeoutId = setTimeout(() => {
+        clearInterval(gameLoop);
+        setGameState('fail');
+        setIsLighterActive(false);
+        setTimeout(() => {
+          setGameState('idle');
+          toast({
+            title: "Time's Up!",
+            description: "The lighter went out. Try again!",
+            variant: "destructive"
+          });
+        }, 1500);
+      }, 15000);
     }
+  };
+
+  // Track mouse position within the lighting game area
+  const handleMouseMove = (e: React.MouseEvent<HTMLDivElement>) => {
+    if (!isLighterActive) return;
+    
+    const rect = e.currentTarget.getBoundingClientRect();
+    const x = ((e.clientX - rect.left) / rect.width) * 100;
+    const y = ((e.clientY - rect.top) / rect.height) * 100;
+    
+    setMousePosition({ x, y });
   };
 
   // Smoking Game
@@ -261,27 +328,67 @@ export const CigarGame = ({ currentStatus, onStatusChange, selectedCigarId }: Ci
               <h3 className="text-lg font-semibold text-warrior-gold">Light Your Cigar</h3>
             </div>
             
-            <div className="text-center">
-              <div className="text-4xl mb-4">🔥</div>
-              {gameState === 'playing' && (
-                <>
-                  <Progress value={lightingProgress} className="w-full mb-4" />
-                  <p className="text-sm text-muted-foreground">Keep the flame steady...</p>
-                </>
-              )}
-            </div>
-
-            <Button
-              onClick={handleLighting}
-              disabled={gameState === 'playing'}
-              variant="warrior"
-              className="w-full"
-            >
-              {gameState === 'playing' ? 'Lighting...' : 'Light It Up'}
-            </Button>
+            {gameState === 'playing' && isLighterActive ? (
+              <div className="space-y-4">
+                <div 
+                  className="relative w-full h-64 bg-warrior-leather/20 rounded-lg border-2 border-warrior-gold/30 cursor-crosshair overflow-hidden"
+                  onMouseMove={handleMouseMove}
+                >
+                  {/* Cigar tip in center */}
+                  <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-4 h-4 bg-warrior-ember rounded-full" />
+                  
+                  {/* Moving lighter */}
+                  <div 
+                    className="absolute w-8 h-8 text-2xl transition-all duration-200 ease-out"
+                    style={{ 
+                      left: `${lighterPosition.x}%`, 
+                      top: `${lighterPosition.y}%`,
+                      transform: 'translate(-50%, -50%)'
+                    }}
+                  >
+                    🔥
+                  </div>
+                  
+                  {/* Mouse cursor indicator */}
+                  <div 
+                    className="absolute w-2 h-2 bg-warrior-gold rounded-full pointer-events-none"
+                    style={{ 
+                      left: `${mousePosition.x}%`, 
+                      top: `${mousePosition.y}%`,
+                      transform: 'translate(-50%, -50%)'
+                    }}
+                  />
+                </div>
+                
+                <Progress value={lightingProgress} className="w-full" />
+                <p className="text-sm text-muted-foreground text-center">
+                  Keep your cursor on the flame! {Math.round(lightingProgress)}%
+                </p>
+              </div>
+            ) : (
+              <div className="text-center space-y-4">
+                <div className="text-4xl mb-4">🚬</div>
+                <p className="text-sm text-muted-foreground">
+                  Click to start the lighter and keep the flame steady on the cigar tip
+                </p>
+                
+                <Button
+                  onClick={handleStartLighting}
+                  disabled={gameState === 'playing'}
+                  variant="warrior"
+                  className="w-full"
+                >
+                  {gameState === 'playing' ? 'Lighting...' : 'Start Lighter 🔥'}
+                </Button>
+              </div>
+            )}
 
             {gameState === 'success' && (
               <div className="text-center text-warrior-gold">Beautifully lit! 🔥</div>
+            )}
+            
+            {gameState === 'fail' && (
+              <div className="text-center text-warrior-ember">Keep it steady! 🔄</div>
             )}
           </div>
         );
