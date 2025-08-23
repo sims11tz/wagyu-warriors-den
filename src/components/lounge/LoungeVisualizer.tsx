@@ -33,6 +33,36 @@ const getStatusColor = (status: string) => {
   }
 };
 
+const getCigarVisual = (member: LoungeMember) => {
+  if (!member.selected_cigar_id && member.cigar_status === 'selecting') return null;
+  
+  switch (member.cigar_status) {
+    case 'cut':
+      return { emoji: '🚬', status: 'Cut & Ready' };
+    case 'lit':
+      return { emoji: '🔥', status: 'Lighting' };
+    case 'smoking':
+      return { emoji: '💨', status: 'Smoking' };
+    case 'finished':
+      return { emoji: '🏁', status: 'Finished' };
+    default:
+      return member.selected_cigar_id ? { emoji: '🚬', status: 'Selected' } : null;
+  }
+};
+
+const getDrinkVisual = (member: LoungeMember) => {
+  if (!member.drink_order_id) return null;
+  
+  const progress = member.drink_progress || 0;
+  if (progress >= 100) {
+    return { emoji: '🥃', status: 'Empty', opacity: 'opacity-50' };
+  } else if (member.drink_status === 'drinking') {
+    return { emoji: '🥃', status: `${Math.round(progress)}%`, opacity: 'opacity-100' };
+  } else {
+    return { emoji: '🥃', status: 'Full', opacity: 'opacity-100' };
+  }
+};
+
 // Seat positions around a circular table
 const seatPositions = [
   { x: 50, y: 20, rotation: 0 },    // Top
@@ -183,6 +213,34 @@ export const LoungeVisualizer = ({ members, currentUserId }: LoungeVisualizerPro
                     )}
                   </div>
 
+                  {/* Cigar Item */}
+                  {(() => {
+                    const cigar = getCigarVisual(member);
+                    if (!cigar) return null;
+                    return (
+                      <div 
+                        className="absolute -right-6 top-2 bg-warrior-leather/80 rounded-full p-1 border border-warrior-gold/30"
+                        title={`Cigar: ${cigar.status}`}
+                      >
+                        <span className="text-sm">{cigar.emoji}</span>
+                      </div>
+                    );
+                  })()}
+
+                  {/* Drink Item */}
+                  {(() => {
+                    const drink = getDrinkVisual(member);
+                    if (!drink) return null;
+                    return (
+                      <div 
+                        className={`absolute -left-6 top-2 bg-warrior-leather/80 rounded-full p-1 border border-warrior-gold/30 ${drink.opacity}`}
+                        title={`Drink: ${drink.status}`}
+                      >
+                        <span className="text-sm">{drink.emoji}</span>
+                      </div>
+                    );
+                  })()}
+
                   {/* Status Indicator */}
                   <div className="absolute -top-2 -right-2">
                     <div className={`w-8 h-8 rounded-full border-2 border-background flex items-center justify-center text-sm ${getStatusColor(member.cigar_status)}`}>
@@ -221,26 +279,44 @@ export const LoungeVisualizer = ({ members, currentUserId }: LoungeVisualizerPro
 
         {/* Legend */}
         <div className="mt-6 pt-4 border-t border-warrior-gold/20">
-          <div className="flex flex-wrap gap-2 justify-center">
-            <div className="flex items-center space-x-1 text-xs">
-              <span>🤔</span>
-              <span className="text-muted-foreground">Selecting</span>
+          <div className="flex flex-wrap gap-4 justify-center text-xs">
+            <div className="flex flex-col items-center space-y-1">
+              <span className="text-muted-foreground font-medium">Cigar Status</span>
+              <div className="flex space-x-3">
+                <div className="flex items-center space-x-1">
+                  <span>🤔</span>
+                  <span className="text-muted-foreground">Selecting</span>
+                </div>
+                <div className="flex items-center space-x-1">
+                  <span>✂️</span>
+                  <span className="text-muted-foreground">Cutting</span>
+                </div>
+                <div className="flex items-center space-x-1">
+                  <span>🔥</span>
+                  <span className="text-muted-foreground">Lighting</span>
+                </div>
+                <div className="flex items-center space-x-1">
+                  <span>💨</span>
+                  <span className="text-muted-foreground">Smoking</span>
+                </div>
+                <div className="flex items-center space-x-1">
+                  <span>✅</span>
+                  <span className="text-muted-foreground">Finished</span>
+                </div>
+              </div>
             </div>
-            <div className="flex items-center space-x-1 text-xs">
-              <span>✂️</span>
-              <span className="text-muted-foreground">Cutting</span>
-            </div>
-            <div className="flex items-center space-x-1 text-xs">
-              <span>🔥</span>
-              <span className="text-muted-foreground">Lighting</span>
-            </div>
-            <div className="flex items-center space-x-1 text-xs">
-              <span>💨</span>
-              <span className="text-muted-foreground">Smoking</span>
-            </div>
-            <div className="flex items-center space-x-1 text-xs">
-              <span>✅</span>
-              <span className="text-muted-foreground">Finished</span>
+            <div className="flex flex-col items-center space-y-1">
+              <span className="text-muted-foreground font-medium">Table Items</span>
+              <div className="flex space-x-3">
+                <div className="flex items-center space-x-1">
+                  <span>🚬</span>
+                  <span className="text-muted-foreground">Cigar</span>
+                </div>
+                <div className="flex items-center space-x-1">
+                  <span>🥃</span>
+                  <span className="text-muted-foreground">Drink</span>
+                </div>
+              </div>
             </div>
           </div>
         </div>
