@@ -118,13 +118,13 @@ export const CigarGame = ({ currentStatus, onStatusChange, selectedCigarId }: Ci
       setLighterPosition({ x: 50, y: 50 });
       
       let steadyTime = 0;
-      const targetTime = 3000; // 3 seconds of steady holding
+      const targetTime = 2000; // 2 seconds of steady holding (reduced from 3)
       
       const gameLoop = setInterval(() => {
-        // Move lighter randomly every 200ms
+        // Move lighter randomly every 500ms (slower from 200ms)
         setLighterPosition(prev => ({
-          x: Math.max(10, Math.min(90, prev.x + (Math.random() - 0.5) * 20)),
-          y: Math.max(10, Math.min(90, prev.y + (Math.random() - 0.5) * 20))
+          x: Math.max(15, Math.min(85, prev.x + (Math.random() - 0.5) * 10)), // Reduced movement range from 20 to 10
+          y: Math.max(15, Math.min(85, prev.y + (Math.random() - 0.5) * 10))
         }));
         
         // Check if mouse is close enough to lighter
@@ -133,8 +133,8 @@ export const CigarGame = ({ currentStatus, onStatusChange, selectedCigarId }: Ci
           Math.pow(mousePosition.y - lighterPosition.y, 2)
         );
         
-        if (distance < 8) { // Within 8% of the game area
-          steadyTime += 200;
+        if (distance < 15) { // Within 15% of the game area (increased from 8%)
+          steadyTime += 500; // Increment matches the interval
           setLightingProgress((steadyTime / targetTime) * 100);
           
           if (steadyTime >= targetTime) {
@@ -152,26 +152,11 @@ export const CigarGame = ({ currentStatus, onStatusChange, selectedCigarId }: Ci
             }, 1500);
           }
         } else {
-          // Lose progress if not keeping flame steady
-          steadyTime = Math.max(0, steadyTime - 100);
+          // Lose progress more slowly if not keeping flame steady
+          steadyTime = Math.max(0, steadyTime - 200); // Less harsh progress loss
           setLightingProgress((steadyTime / targetTime) * 100);
-          
-          // Fail if they can't maintain it
-          if (lightingProgress > 50 && steadyTime <= 0) {
-            clearInterval(gameLoop);
-            setGameState('fail');
-            setIsLighterActive(false);
-            setTimeout(() => {
-              setGameState('idle');
-              toast({
-                title: "Try Again",
-                description: "Keep the flame steady on the cigar tip!",
-                variant: "destructive"
-              });
-            }, 1500);
-          }
         }
-      }, 200);
+      }, 500); // Slower interval from 200ms to 500ms
       
       // Auto-fail after 15 seconds
       const timeoutId = setTimeout(() => {
