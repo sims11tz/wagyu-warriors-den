@@ -381,7 +381,7 @@ export const LoungeVisualizer = ({ members, currentUserId, onCigarClick, onDrink
           {/* Floating Chat Messages - left side */}
           {messages.length > 0 && (
             <div className="absolute left-4 top-4 bottom-20 w-72 z-40">
-              <div className="bg-black/20 backdrop-blur-md rounded-lg border border-warrior-gold/30 shadow-2xl h-full flex flex-col">
+              <div className="bg-black/5 backdrop-blur-sm rounded-lg border border-warrior-gold/20 shadow-xl h-full flex flex-col">
                 <div className="p-3 border-b border-warrior-gold/20">
                   <h3 className="text-sm font-bold text-warrior-gold">Lounge Chat</h3>
                 </div>
