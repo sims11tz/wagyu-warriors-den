@@ -2,6 +2,8 @@ import { useRef, useEffect, useState, useCallback } from 'react';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { X, Trophy, Timer, Target } from 'lucide-react';
+import { supabase } from '@/integrations/supabase/client';
+import { toast } from 'sonner';
 import wagyuCuttingBoard from '@/assets/wagyu-cutting-board.jpg';
 import yakuzaWarriorEating from '@/assets/yakuza-warrior-eating.jpg';
 
@@ -43,6 +45,8 @@ export const SlicingGame: React.FC<SlicingGameProps> = ({
   const [completionReason, setCompletionReason] = useState<'time' | 'perfect'>('time');
   const [cutEffects, setCutEffects] = useState<CutEffect[]>([]);
   const [previewLine, setPreviewLine] = useState<{ x1: number; y1: number; x2: number; y2: number } | null>(null);
+  const [isSaving, setIsSaving] = useState(false);
+  const [savedToChefs, setSavedToChefs] = useState(false);
   const imageRef = useRef<HTMLImageElement>(null);
 
   // Game timer
@@ -326,6 +330,43 @@ export const SlicingGame: React.FC<SlicingGameProps> = ({
     document.addEventListener('mouseup', handleMouseUp);
   };
 
+  const saveToChefs = async () => {
+    if (!gameEnded) return;
+
+    setIsSaving(true);
+    try {
+      const { data: { user } } = await supabase.auth.getUser();
+      
+      if (!user) {
+        toast.error('You must be logged in to save to Chefs Table.');
+        return;
+      }
+
+      const { error } = await supabase
+        .from('slicing_results')
+        .insert({
+          user_id: user.id,
+          score: calculateFinalScore(),
+          cuts_made: cuts.length,
+          perfect_cuts: perfectCuts,
+          cut_type: cutType,
+          cut_name: cutName,
+          time_left: timeLeft,
+          completion_reason: completionReason,
+        });
+
+      if (error) throw error;
+
+      setSavedToChefs(true);
+      toast.success('Results saved to Chefs Table! Other warriors can see your skills.');
+    } catch (error) {
+      console.error('Error saving to chefs table:', error);
+      toast.error('Failed to save to Chefs Table. Please try again.');
+    } finally {
+      setIsSaving(false);
+    }
+  };
+
   const startGame = () => {
     setGameStarted(true);
     setTimeLeft(30);
@@ -335,6 +376,8 @@ export const SlicingGame: React.FC<SlicingGameProps> = ({
     setCompletionReason('time');
     setPreviewLine(null);
     setCutEffects([]);
+    setSavedToChefs(false);
+    setIsSaving(false);
   };
 
   const perfectCuts = cuts.filter(cut => cut.quality === 'perfect').length;
@@ -455,6 +498,21 @@ export const SlicingGame: React.FC<SlicingGameProps> = ({
                       <p className="text-warrior-gold font-semibold">Final Score: {calculateFinalScore()}</p>
                     </div>
                     <p className="text-warrior-light text-xs mt-2 italic">The yakuza warrior savors your masterful cuts</p>
+                    
+                    <div className="mt-4 space-y-2">
+                      <Button 
+                        variant="warrior" 
+                        size="sm" 
+                        onClick={saveToChefs}
+                        disabled={isSaving || savedToChefs}
+                        className="w-full"
+                      >
+                        {isSaving ? 'Saving...' : savedToChefs ? 'Saved to Chefs Table ✓' : 'Save to Chefs Table'}
+                      </Button>
+                      {savedToChefs && (
+                        <p className="text-green-400 text-xs text-center">Your masterpiece is now on display!</p>
+                      )}
+                    </div>
                   </div>
                 </div>
               )}

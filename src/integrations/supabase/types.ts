@@ -321,6 +321,45 @@ export type Database = {
         }
         Relationships: []
       }
+      slicing_results: {
+        Row: {
+          completion_reason: string | null
+          created_at: string
+          cut_name: string
+          cut_type: string
+          cuts_made: number
+          id: string
+          perfect_cuts: number
+          score: number
+          time_left: number | null
+          user_id: string
+        }
+        Insert: {
+          completion_reason?: string | null
+          created_at?: string
+          cut_name: string
+          cut_type: string
+          cuts_made: number
+          id?: string
+          perfect_cuts: number
+          score: number
+          time_left?: number | null
+          user_id: string
+        }
+        Update: {
+          completion_reason?: string | null
+          created_at?: string
+          cut_name?: string
+          cut_type?: string
+          cuts_made?: number
+          id?: string
+          perfect_cuts?: number
+          score?: number
+          time_left?: number | null
+          user_id?: string
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never
