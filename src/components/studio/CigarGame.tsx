@@ -133,7 +133,7 @@ export const CigarGame = ({ currentStatus, onStatusChange, selectedCigarId }: Ci
           Math.pow(mousePosition.y - lighterPosition.y, 2)
         );
         
-        if (distance < 15) { // Within 15% of the game area (increased from 8%)
+        if (distance < 25) { // Much larger target area - 25% of the game area
           steadyTime += 500; // Increment matches the interval
           setLightingProgress((steadyTime / targetTime) * 100);
           
@@ -152,13 +152,13 @@ export const CigarGame = ({ currentStatus, onStatusChange, selectedCigarId }: Ci
             }, 1500);
           }
         } else {
-          // Lose progress more slowly if not keeping flame steady
-          steadyTime = Math.max(0, steadyTime - 200); // Less harsh progress loss
+          // Only lose a tiny bit of progress - very forgiving
+          steadyTime = Math.max(0, steadyTime - 50); // Much less harsh progress loss
           setLightingProgress((steadyTime / targetTime) * 100);
         }
       }, 500); // Slower interval from 200ms to 500ms
       
-      // Auto-fail after 15 seconds
+      // Much longer timeout - 30 seconds instead of 15
       const timeoutId = setTimeout(() => {
         clearInterval(gameLoop);
         setGameState('fail');
@@ -171,7 +171,7 @@ export const CigarGame = ({ currentStatus, onStatusChange, selectedCigarId }: Ci
             variant: "destructive"
           });
         }, 1500);
-      }, 15000);
+      }, 30000);
     }
   };
 
@@ -334,15 +334,20 @@ export const CigarGame = ({ currentStatus, onStatusChange, selectedCigarId }: Ci
                     🔥
                   </div>
                   
-                  {/* Mouse cursor indicator */}
-                  <div 
-                    className="absolute w-2 h-2 bg-warrior-gold rounded-full pointer-events-none"
-                    style={{ 
-                      left: `${mousePosition.x}%`, 
-                      top: `${mousePosition.y}%`,
-                      transform: 'translate(-50%, -50%)'
-                    }}
-                  />
+                   {/* Mouse cursor indicator */}
+                   <div 
+                     className={`absolute w-4 h-4 rounded-full pointer-events-none transition-all duration-200 ${
+                       Math.sqrt(
+                         Math.pow(mousePosition.x - lighterPosition.x, 2) + 
+                         Math.pow(mousePosition.y - lighterPosition.y, 2)
+                       ) < 25 ? 'bg-green-400 ring-2 ring-green-300' : 'bg-warrior-gold'
+                     }`}
+                     style={{ 
+                       left: `${mousePosition.x}%`, 
+                       top: `${mousePosition.y}%`,
+                       transform: 'translate(-50%, -50%)'
+                     }}
+                   />
                 </div>
                 
                 <Progress value={lightingProgress} className="w-full" />
