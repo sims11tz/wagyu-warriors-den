@@ -67,7 +67,7 @@ export const SearingGame: React.FC<SearingGameProps> = ({
     const timer = setInterval(() => {
       setTimeLeft(prev => {
         if (prev <= 1) {
-          setGameEnded(true);
+          completeGame();
           return 0;
         }
         return prev - 1;
