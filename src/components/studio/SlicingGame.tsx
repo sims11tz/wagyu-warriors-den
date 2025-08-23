@@ -3,6 +3,7 @@ import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { X, Trophy, Timer, Target } from 'lucide-react';
 import wagyuCuttingBoard from '@/assets/wagyu-cutting-board.jpg';
+import yakuzaWarriorEating from '@/assets/yakuza-warrior-eating.jpg';
 
 interface SlicingGameProps {
   cutType: string;
@@ -430,7 +431,14 @@ export const SlicingGame: React.FC<SlicingGameProps> = ({
               
               {gameEnded && (
                 <div className="absolute inset-0 bg-black/70 flex items-center justify-center rounded-lg">
-                  <div className="text-center warrior-glass p-6 rounded-xl border border-warrior-gold/20">
+                  <div className="text-center warrior-glass p-6 rounded-xl border border-warrior-gold/20 max-w-md">
+                    <div className="mb-4">
+                      <img 
+                        src={yakuzaWarriorEating} 
+                        alt="Yakuza warrior enjoying the perfectly sliced wagyu" 
+                        className="w-full h-32 object-cover rounded-lg border border-warrior-gold/30"
+                      />
+                    </div>
                     <Trophy className="w-12 h-12 text-warrior-gold mx-auto mb-3" />
                     <h3 className="text-xl font-bold text-warrior-gold mb-2">
                       {completionReason === 'perfect' ? 'Master Achievement!' : 'Challenge Complete!'}
@@ -446,6 +454,7 @@ export const SlicingGame: React.FC<SlicingGameProps> = ({
                       )}
                       <p className="text-warrior-gold font-semibold">Final Score: {calculateFinalScore()}</p>
                     </div>
+                    <p className="text-warrior-light text-xs mt-2 italic">The yakuza warrior savors your masterful cuts</p>
                   </div>
                 </div>
               )}
