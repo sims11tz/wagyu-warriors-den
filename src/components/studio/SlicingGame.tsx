@@ -332,32 +332,47 @@ export const SlicingGame: React.FC<SlicingGameProps> = ({
   };
 
   const saveToChefs = async () => {
-    if (!gameEnded) return;
+    console.log('Save to Chefs clicked!', { gameEnded, isSaving, savedToChefs });
+    
+    if (!gameEnded) {
+      console.log('Game not ended, cannot save');
+      return;
+    }
 
     setIsSaving(true);
     try {
       const { data: { user } } = await supabase.auth.getUser();
+      console.log('User check:', user);
       
       if (!user) {
+        console.log('No user found');
         toast.error('You must be logged in to save to Chefs Table.');
         return;
       }
 
+      const resultData = {
+        user_id: user.id,
+        score: calculateFinalScore(),
+        cuts_made: cuts.length,
+        perfect_cuts: perfectCuts,
+        cut_type: cutType,
+        cut_name: cutName,
+        time_left: timeLeft,
+        completion_reason: completionReason,
+      };
+
+      console.log('Saving result:', resultData);
+
       const { error } = await supabase
         .from('slicing_results')
-        .insert({
-          user_id: user.id,
-          score: calculateFinalScore(),
-          cuts_made: cuts.length,
-          perfect_cuts: perfectCuts,
-          cut_type: cutType,
-          cut_name: cutName,
-          time_left: timeLeft,
-          completion_reason: completionReason,
-        });
+        .insert(resultData);
 
-      if (error) throw error;
+      if (error) {
+        console.error('Supabase error:', error);
+        throw error;
+      }
 
+      console.log('Successfully saved to database');
       setSavedToChefs(true);
       toast.success('Results saved to Chefs Table! Other warriors can see your skills.');
     } catch (error) {
