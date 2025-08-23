@@ -334,26 +334,59 @@ export const CigarGame = ({ currentStatus, onStatusChange, selectedCigarId }: Ci
                     🔥
                   </div>
                   
-                   {/* Mouse cursor indicator */}
-                   <div 
-                     className={`absolute w-4 h-4 rounded-full pointer-events-none transition-all duration-200 ${
-                       Math.sqrt(
-                         Math.pow(mousePosition.x - lighterPosition.x, 2) + 
-                         Math.pow(mousePosition.y - lighterPosition.y, 2)
-                       ) < 25 ? 'bg-green-400 ring-2 ring-green-300' : 'bg-warrior-gold'
-                     }`}
-                     style={{ 
-                       left: `${mousePosition.x}%`, 
-                       top: `${mousePosition.y}%`,
-                       transform: 'translate(-50%, -50%)'
-                     }}
-                   />
+                  {/* Target zone indicator (visual helper) */}
+                  <div 
+                    className="absolute w-16 h-16 border-2 border-dashed border-warrior-gold/40 rounded-full pointer-events-none"
+                    style={{ 
+                      left: `${lighterPosition.x}%`, 
+                      top: `${lighterPosition.y}%`,
+                      transform: 'translate(-50%, -50%)'
+                    }}
+                  />
+                  
+                  {/* Mouse cursor indicator */}
+                  <div 
+                    className={`absolute w-4 h-4 rounded-full pointer-events-none transition-all duration-200 ${
+                      Math.sqrt(
+                        Math.pow(mousePosition.x - lighterPosition.x, 2) + 
+                        Math.pow(mousePosition.y - lighterPosition.y, 2)
+                      ) < 25 ? 'bg-green-400 ring-2 ring-green-300' : 'bg-red-400 ring-2 ring-red-300'
+                    }`}
+                    style={{ 
+                      left: `${mousePosition.x}%`, 
+                      top: `${mousePosition.y}%`,
+                      transform: 'translate(-50%, -50%)'
+                    }}
+                  />
+                  
+                  {/* Status overlay */}
+                  <div className="absolute top-4 left-4 right-4">
+                    <div className={`text-center text-lg font-bold ${
+                      Math.sqrt(
+                        Math.pow(mousePosition.x - lighterPosition.x, 2) + 
+                        Math.pow(mousePosition.y - lighterPosition.y, 2)
+                      ) < 25 ? 'text-green-300' : 'text-red-300'
+                    }`}>
+                      {Math.sqrt(
+                        Math.pow(mousePosition.x - lighterPosition.x, 2) + 
+                        Math.pow(mousePosition.y - lighterPosition.y, 2)
+                      ) < 25 ? '🔥 LIGHTING! 🔥' : '❌ MOVE CLOSER ❌'}
+                    </div>
+                  </div>
                 </div>
                 
-                <Progress value={lightingProgress} className="w-full" />
-                <p className="text-sm text-muted-foreground text-center">
-                  Keep your cursor on the flame! {Math.round(lightingProgress)}%
-                </p>
+                <div className="space-y-2">
+                  <div className="flex justify-between items-center">
+                    <span className="text-sm font-medium text-foreground">Lighting Progress</span>
+                    <span className={`text-sm font-bold ${lightingProgress > 50 ? 'text-green-400' : 'text-warrior-gold'}`}>
+                      {Math.round(lightingProgress)}%
+                    </span>
+                  </div>
+                  <Progress value={lightingProgress} className="w-full h-3" />
+                  <p className="text-xs text-muted-foreground text-center">
+                    Keep your cursor in the dashed circle around the flame!
+                  </p>
+                </div>
               </div>
             ) : (
               <div className="text-center space-y-4">
