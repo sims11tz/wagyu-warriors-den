@@ -69,11 +69,30 @@ export const ButcherKitchen: React.FC = () => {
   };
 
   const saveCookingSession = async () => {
-    if (!user || !selectedCut || !searingScore || !sliceScore) return;
+    if (!user || !selectedCut || !searingScore || !sliceScore) {
+      console.log('Cannot save cooking session:', { 
+        hasUser: !!user, 
+        selectedCut, 
+        searingScore, 
+        sliceScore 
+      });
+      return;
+    }
 
     try {
       const cutData = primalCuts.find(c => c.id === selectedCut);
       const totalScore = searingScore + sliceScore;
+
+      console.log('Saving cooking session:', {
+        user_id: user.id,
+        cut_type: selectedCut,
+        cut_name: cutData?.name || '',
+        searing_score: searingScore,
+        searing_technique: searingTechnique,
+        slicing_score: sliceScore,
+        total_cuts: totalCuts,
+        total_score: totalScore
+      });
 
       const { error } = await supabase
         .from('cooking_sessions')
@@ -88,8 +107,12 @@ export const ButcherKitchen: React.FC = () => {
           total_score: totalScore
         });
 
-      if (error) throw error;
+      if (error) {
+        console.error('Supabase error:', error);
+        throw error;
+      }
 
+      console.log('Cooking session saved successfully!');
       toast.success("Cooking session saved! Your stats have been updated.");
     } catch (error: any) {
       console.error('Error saving cooking session:', error);

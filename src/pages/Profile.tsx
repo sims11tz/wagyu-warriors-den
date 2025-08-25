@@ -19,6 +19,38 @@ const Profile = () => {
   const navigate = useNavigate();
   const [loading, setLoading] = useState(false);
   const [birthDate, setBirthDate] = useState("");
+  const [meatsCount, setMeatsCount] = useState(0);
+
+  // Fetch meats prepared count
+  useEffect(() => {
+    const fetchMeatsCount = async () => {
+      if (!user) return;
+      
+      try {
+        const { count, error } = await supabase
+          .from('cooking_sessions')
+          .select('*', { count: 'exact', head: true })
+          .eq('user_id', user.id);
+        
+        if (error) throw error;
+        setMeatsCount(count || 0);
+      } catch (error) {
+        console.error('Error fetching meats count:', error);
+        setMeatsCount(0);
+      }
+    };
+
+    fetchMeatsCount();
+  }, [user]);
+
+  const MeatsStatCounter = () => (
+    <div className="text-center">
+      <div className="text-2xl font-bold text-warrior-gold">
+        {meatsCount}
+      </div>
+      <div className="text-xs text-muted-foreground">Meats Prepared</div>
+    </div>
+  );
 
   // Refresh profile stats when component mounts
   useEffect(() => {
@@ -281,7 +313,7 @@ const Profile = () => {
             <CardDescription>Your culinary achievements</CardDescription>
           </CardHeader>
           <CardContent>
-            <div className="grid grid-cols-3 gap-4">
+            <div className="grid grid-cols-4 gap-4">
               <div className="text-center">
                 <div className="text-2xl font-bold text-warrior-gold">
                   {profile.marbling_points || 0}
@@ -300,6 +332,7 @@ const Profile = () => {
                 </div>
                 <div className="text-xs text-muted-foreground">Smoke Rings</div>
               </div>
+              <MeatsStatCounter />
             </div>
           </CardContent>
         </Card>

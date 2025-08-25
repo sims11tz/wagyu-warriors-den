@@ -1,9 +1,12 @@
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { StatCard } from "./StatCard";
-import { Flame, Target, Cigarette, Edit, Trophy, Star } from "lucide-react";
+import { Flame, Target, Cigarette, Edit, Trophy, Star, ChefHat } from "lucide-react";
 import { useProfile } from "@/hooks/useProfile";
 import { Skeleton } from "@/components/ui/skeleton";
+import { useState, useEffect } from "react";
+import { supabase } from "@/integrations/supabase/client";
+import { useAuth } from "@/contexts/AuthContext";
 
 interface WarriorProfileProps {
   onEditProfile: () => void;
@@ -12,6 +15,40 @@ interface WarriorProfileProps {
 
 export const WarriorProfile: React.FC<WarriorProfileProps> = ({ onEditProfile, onNavigateToTab }) => {
   const { profile, loading, error, avatarUrl } = useProfile();
+  const { user } = useAuth();
+  const [meatsCount, setMeatsCount] = useState(0);
+
+  // Fetch meats prepared count
+  useEffect(() => {
+    const fetchMeatsCount = async () => {
+      if (!user) return;
+      
+      try {
+        const { count, error } = await supabase
+          .from('cooking_sessions')
+          .select('*', { count: 'exact', head: true })
+          .eq('user_id', user.id);
+        
+        if (error) throw error;
+        setMeatsCount(count || 0);
+      } catch (error) {
+        console.error('Error fetching meats count:', error);
+        setMeatsCount(0);
+      }
+    };
+
+    fetchMeatsCount();
+  }, [user]);
+
+  const MeatsStatCard = () => (
+    <StatCard
+      title="Meats"
+      value={meatsCount}
+      icon={ChefHat}
+      color="gold"
+      className="text-xs"
+    />
+  );
 
   if (loading) {
     return (
@@ -103,7 +140,7 @@ export const WarriorProfile: React.FC<WarriorProfileProps> = ({ onEditProfile, o
       </div>
 
       {/* Stats Grid */}
-      <div className="grid grid-cols-3 gap-4">
+      <div className="grid grid-cols-4 gap-3">
         <StatCard
           title="Marbling"
           value={profile.marbling_points || 0}
@@ -122,6 +159,7 @@ export const WarriorProfile: React.FC<WarriorProfileProps> = ({ onEditProfile, o
           icon={Cigarette}
           color="smoke"
         />
+        <MeatsStatCard />
       </div>
 
       {/* Favorite Cuts */}
