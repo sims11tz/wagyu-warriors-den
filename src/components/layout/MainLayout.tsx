@@ -24,6 +24,9 @@ export const MainLayout: React.FC<MainLayoutProps> = ({ className }) => {
   const navigate = useNavigate();
   const { toast } = useToast();
 
+  // Add debug logging
+  console.log('MainLayout rendered - activeTab:', activeTab);
+
   const handleLogout = async () => {
     try {
       await signOut();

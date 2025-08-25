@@ -18,6 +18,9 @@ export const WarriorProfile: React.FC<WarriorProfileProps> = ({ onEditProfile, o
   const { user } = useAuth();
   const [meatsCount, setMeatsCount] = useState(0);
 
+  // Add debug logging
+  console.log('WarriorProfile rendered - profile:', !!profile, 'loading:', loading, 'error:', error);
+
   // Fetch meats prepared count
   useEffect(() => {
     const fetchMeatsCount = async () => {

@@ -21,6 +21,9 @@ const Index = () => {
     );
   }
 
+  // Add debug logging
+  console.log('Index.tsx - Auth state:', { user: !!user, loading, userId: user?.id });
+
   if (!user) {
     return (
       <div className="min-h-screen warrior-dark relative overflow-hidden">
