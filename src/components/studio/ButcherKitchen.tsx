@@ -126,11 +126,23 @@ export const ButcherKitchen: React.FC = () => {
     <div className="space-y-6 pb-24">
       {/* Header */}
       <div className="warrior-glass rounded-xl p-6 border border-warrior-gold/20">
-        <div className="flex items-center space-x-3 mb-4">
-          <ChefHat className="text-warrior-gold" size={24} />
-          <div>
-            <h2 className="text-xl font-bold text-foreground">Butcher Kitchen</h2>
-            <p className="text-sm text-muted-foreground">Master the art of the blade</p>
+        <div className="flex items-start justify-between mb-4">
+          <div className="flex items-center space-x-3">
+            <ChefHat className="text-warrior-gold" size={24} />
+            <div>
+              <h2 className="text-xl font-bold text-foreground">Butcher Kitchen</h2>
+              <p className="text-sm text-muted-foreground">Master the art of the blade</p>
+            </div>
+          </div>
+          
+          {/* Instructions */}
+          <div className="text-right">
+            <p className="text-xs text-warrior-gold/80 font-medium">Kitchen Protocol:</p>
+            <div className="text-xs text-muted-foreground space-y-1 mt-1">
+              <p>1: Select your meat</p>
+              <p>2: Cook to perfection</p>
+              <p>3: Slice for best presentation</p>
+            </div>
           </div>
         </div>
 
