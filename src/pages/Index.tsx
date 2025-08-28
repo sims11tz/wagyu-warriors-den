@@ -2,7 +2,8 @@ import { MainLayout } from "@/components/layout/MainLayout";
 import { useAuth } from "@/contexts/AuthContext";
 import { Button } from "@/components/ui/button";
 import { Link } from "react-router-dom";
-import { Shield, Crown, Flame, ChevronRight, Lock, Star } from "lucide-react";
+import { Shield, Flame, ChevronRight, Lock, Star } from "lucide-react";
+import wagyuWarriorsLogo from "@/assets/wagyu-warriors-logo.webp";
 import { useState, useEffect } from "react";
 
 const Index = () => {
@@ -44,8 +45,8 @@ const Index = () => {
             {/* Main Logo/Title */}
             <div className="mb-8 space-y-4">
               <div className="flex items-center justify-center mb-6">
-                <div className="p-4 rounded-full bg-warrior-gold/10 border border-warrior-gold/30 backdrop-blur-sm">
-                  <Crown className="w-12 h-12 text-warrior-gold" />
+                <div className="p-4 rounded-xl bg-warrior-gold/10 border border-warrior-gold/30 backdrop-blur-sm">
+                  <img src={wagyuWarriorsLogo} alt="Wagyu Warriors Logo" className="w-12 h-12 object-cover" />
                 </div>
               </div>
               
