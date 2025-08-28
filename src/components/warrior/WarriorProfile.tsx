@@ -165,49 +165,7 @@ export const WarriorProfile: React.FC<WarriorProfileProps> = ({ onEditProfile, o
         <MeatsStatCard />
       </div>
 
-      {/* Favorite Cuts */}
-      <div className="warrior-glass rounded-xl p-6 border border-warrior-gold/20">
-        <h3 className="text-lg font-semibold text-foreground mb-4">Signature Cuts</h3>
-        <div className="flex flex-wrap gap-2">
-          {profile.favorites && typeof profile.favorites === 'object' && 
-           Array.isArray((profile.favorites as any).cuts) ? 
-           (profile.favorites as any).cuts.map((cut: string, index: number) => (
-            <Badge
-              key={index}
-              variant="outline"
-              className="border-warrior-ember/50 text-warrior-ember bg-warrior-ember/10"
-            >
-              {cut}
-            </Badge>
-          )) : (
-            <p className="text-sm text-muted-foreground">No signature cuts selected yet.</p>
-          )}
-        </div>
-      </div>
-
-      {/* Achievements */}
-      <div className="warrior-glass rounded-xl p-6 border border-warrior-gold/20">
-        <h3 className="text-lg font-semibold text-foreground mb-4">Battle Honors</h3>
-        <div className="grid grid-cols-2 gap-3">
-          {profile.favorites && typeof profile.favorites === 'object' && 
-           Array.isArray((profile.favorites as any).badges) ? 
-           (profile.favorites as any).badges.map((badge: string, index: number) => (
-            <div
-              key={index}
-              className="flex items-center p-3 rounded-lg warrior-gradient-smoke border border-warrior-gold/30"
-            >
-              <div className="w-8 h-8 rounded-full bg-warrior-gold flex items-center justify-center mr-3">
-                <Star size={14} className="text-warrior-dark" fill="currentColor" />
-              </div>
-              <span className="text-sm font-medium text-foreground">{badge}</span>
-            </div>
-          )) : (
-            <div className="col-span-2">
-              <p className="text-sm text-muted-foreground text-center">No battle honors earned yet.</p>
-            </div>
-          )}
-        </div>
-      </div>
+      {/* Removed Signature Cuts and Battle Honors sections */}
 
       {/* Action Buttons */}
       <div className="flex flex-col gap-3">
