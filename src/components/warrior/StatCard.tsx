@@ -30,7 +30,7 @@ export const StatCard: React.FC<StatCardProps> = ({
 
   return (
     <div className={cn(
-      "warrior-glass rounded-xl p-4 border",
+      "warrior-glass rounded-xl p-4 border bg-warrior-dark/90 backdrop-blur-sm",
       colorClasses[color],
       className
     )}>

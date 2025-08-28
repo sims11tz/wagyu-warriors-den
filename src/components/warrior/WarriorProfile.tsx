@@ -7,6 +7,7 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { useState, useEffect } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
+import yakuzaClubBackground from "@/assets/yakuza-club-background.webp";
 
 interface WarriorProfileProps {
   onEditProfile: () => void;
@@ -96,85 +97,111 @@ export const WarriorProfile: React.FC<WarriorProfileProps> = ({ onEditProfile, o
                   profile.tier === 'member' ? 'Active Warrior' : 'Founding Warrior';
 
   return (
-    <div className="space-y-6 pb-24">
-      {/* Hero Profile Section */}
-      <div className="relative warrior-gradient-leather rounded-2xl p-6 warrior-shadow overflow-hidden">
-        <div className="absolute inset-0 bg-gradient-to-r from-warrior-gold/10 to-transparent" />
-        <div className="relative flex items-start space-x-4">
-          <div className="relative">
-            {avatarUrl ? (
-              <img
-                src={avatarUrl}
-                alt={displayHandle}
-                className="w-20 h-20 rounded-full object-cover border-3 border-warrior-gold warrior-shadow-gold"
-                key={`${profile.avatar_id}-${avatarUrl}`} // Force re-render when avatar changes
-              />
-            ) : (
-              <div className="w-20 h-20 rounded-full bg-warrior-gold/20 border-3 border-warrior-gold warrior-shadow-gold flex items-center justify-center">
-                <span className="text-2xl font-bold text-warrior-gold">
-                  {displayHandle.charAt(0).toUpperCase()}
-                </span>
+    <div 
+      className="relative min-h-screen pb-24"
+      style={{
+        backgroundImage: `url(${yakuzaClubBackground})`,
+        backgroundSize: 'cover',
+        backgroundPosition: 'center',
+        backgroundRepeat: 'no-repeat'
+      }}
+    >
+      {/* Dark overlay for readability */}
+      <div className="absolute inset-0 bg-warrior-dark/80 backdrop-blur-[1px]" />
+      
+      <div className="relative z-10 space-y-6">
+        {/* Hero Profile Section */}
+        <div className="relative warrior-gradient-leather rounded-2xl p-6 warrior-shadow overflow-hidden border border-warrior-gold/30 bg-warrior-dark/90 backdrop-blur-sm">
+          <div className="absolute inset-0 bg-gradient-to-r from-warrior-gold/10 to-transparent" />
+          <div className="relative flex items-start space-x-4">
+            <div className="relative">
+              {avatarUrl ? (
+                <img
+                  src={avatarUrl}
+                  alt={displayHandle}
+                  className="w-20 h-20 rounded-full object-cover border-3 border-warrior-gold warrior-shadow-gold"
+                  key={`${profile.avatar_id}-${avatarUrl}`} // Force re-render when avatar changes
+                />
+              ) : (
+                <div className="w-20 h-20 rounded-full bg-warrior-gold/20 border-3 border-warrior-gold warrior-shadow-gold flex items-center justify-center">
+                  <span className="text-2xl font-bold text-warrior-gold">
+                    {displayHandle.charAt(0).toUpperCase()}
+                  </span>
+                </div>
+              )}
+              <div className="absolute -bottom-1 -right-1 p-1 bg-warrior-gold rounded-full">
+                <Star size={12} className="text-warrior-dark" fill="currentColor" />
               </div>
-            )}
-            <div className="absolute -bottom-1 -right-1 p-1 bg-warrior-gold rounded-full">
-              <Star size={12} className="text-warrior-dark" fill="currentColor" />
-            </div>
-          </div>
-          
-          <div className="flex-1">
-            <div className="flex items-center justify-between">
-              <div>
-                <h1 className="text-xl font-bold text-foreground">{displayHandle}</h1>
-                <Badge variant="outline" className="border-warrior-gold text-warrior-gold bg-warrior-gold/10 mt-1">
-                  <Trophy size={12} className="mr-1" />
-                  {tierName}
-                </Badge>
-              </div>
-              <Button variant="warrior-ghost" size="sm" onClick={onEditProfile}>
-                <Edit size={16} />
-              </Button>
             </div>
             
-            <p className="text-sm text-muted-foreground mt-3 leading-relaxed">
-              {displayBio}
-            </p>
+            <div className="flex-1">
+              <div className="flex items-center justify-between">
+                <div>
+                  <h1 className="text-xl font-bold text-foreground">{displayHandle}</h1>
+                  <Badge variant="outline" className="border-warrior-gold text-warrior-gold bg-warrior-gold/10 mt-1">
+                    <Trophy size={12} className="mr-1" />
+                    {tierName}
+                  </Badge>
+                </div>
+                <Button variant="warrior-ghost" size="sm" onClick={onEditProfile}>
+                  <Edit size={16} />
+                </Button>
+              </div>
+              
+              <p className="text-sm text-muted-foreground mt-3 leading-relaxed">
+                {displayBio}
+              </p>
+            </div>
           </div>
         </div>
-      </div>
 
-      {/* Stats Grid */}
-      <div className="grid grid-cols-4 gap-3">
-        <StatCard
-          title="Marbling"
-          value={profile.marbling_points || 0}
-          icon={Target}
-          color="gold"
-        />
-        <StatCard
-          title="Sear Score"
-          value={profile.sear_score || 0}
-          icon={Flame}
-          color="ember"
-        />
-        <StatCard
-          title="Smoke Rings"
-          value={profile.smoke_rings || 0}
-          icon={Cigarette}
-          color="smoke"
-        />
-        <MeatsStatCard />
-      </div>
+        {/* Stats Grid */}
+        <div className="grid grid-cols-4 gap-3">
+          <StatCard
+            title="Marbling"
+            value={profile.marbling_points || 0}
+            icon={Target}
+            color="gold"
+          />
+          <StatCard
+            title="Sear Score"
+            value={profile.sear_score || 0}
+            icon={Flame}
+            color="ember"
+          />
+          <StatCard
+            title="Smoke Rings"
+            value={profile.smoke_rings || 0}
+            icon={Cigarette}
+            color="smoke"
+          />
+          <MeatsStatCard />
+        </div>
 
-      {/* Removed Signature Cuts and Battle Honors sections */}
+        {/* Removed Signature Cuts and Battle Honors sections */}
 
-      {/* Action Buttons */}
-      <div className="flex flex-col gap-3">
-        <Button variant="warrior" size="lg" className="w-full" onClick={() => onNavigateToTab("butcher")}>
-          Enter Butcher Kitchen
-        </Button>
-        <Button variant="warrior-outline" size="lg" className="w-full" onClick={() => onNavigateToTab("lounge")}>
-          Join Cigar Lounge
-        </Button>
+        {/* Action Buttons with Door Styling */}
+        <div className="flex flex-col gap-4">
+          <Button 
+            variant="warrior" 
+            size="lg" 
+            className="w-full relative overflow-hidden group bg-warrior-leather/80 border-2 border-warrior-gold/50 hover:border-warrior-gold transition-all duration-300" 
+            onClick={() => onNavigateToTab("butcher")}
+          >
+            <div className="absolute inset-0 bg-gradient-to-r from-warrior-gold/20 via-warrior-ember/10 to-warrior-gold/20 opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
+            <span className="relative z-10 font-cinzel text-lg tracking-wide">🚪 Enter Butcher Kitchen</span>
+          </Button>
+          
+          <Button 
+            variant="warrior-outline" 
+            size="lg" 
+            className="w-full relative overflow-hidden group bg-warrior-dark/80 border-2 border-warrior-smoke/50 hover:border-warrior-smoke transition-all duration-300 backdrop-blur-sm" 
+            onClick={() => onNavigateToTab("lounge")}
+          >
+            <div className="absolute inset-0 bg-gradient-to-r from-warrior-smoke/20 via-warrior-gold/10 to-warrior-smoke/20 opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
+            <span className="relative z-10 font-cinzel text-lg tracking-wide">🚪 Join Cigar Lounge</span>
+          </Button>
+        </div>
       </div>
     </div>
   );
