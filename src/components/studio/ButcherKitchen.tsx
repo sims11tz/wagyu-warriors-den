@@ -126,24 +126,30 @@ export const ButcherKitchen: React.FC = () => {
     <div className="space-y-6 pb-24">
       {/* Header */}
       <div className="warrior-glass rounded-xl p-6 border border-warrior-gold/20">
-        <div className="flex flex-col items-center mb-4">
-          <div className="flex items-center space-x-3 mb-4">
+        <div className="flex items-center justify-between mb-4">
+          {/* Left side - Butcher Kitchen block */}
+          <div className="flex items-center space-x-3">
             <ChefHat className="text-warrior-gold" size={24} />
-            <div className="text-center">
+            <div>
               <h2 className="text-xl font-bold text-foreground">Butcher Kitchen</h2>
               <p className="text-sm text-muted-foreground">Master the art of the blade</p>
             </div>
           </div>
           
-          {/* Instructions - Centered */}
-          <div className="text-center">
-            <p className="text-sm text-warrior-gold font-semibold underline decoration-warrior-gold/50 underline-offset-2 mb-2">Kitchen Protocol:</p>
-            <div className="text-xs text-muted-foreground space-y-1">
-              <p>1: Select your meat</p>
-              <p>2: Cook to perfection</p>
-              <p>3: Slice for best presentation</p>
+          {/* Center - Kitchen Protocol */}
+          <div className="flex-1 flex justify-center">
+            <div className="text-center">
+              <p className="text-sm text-warrior-gold font-semibold underline decoration-warrior-gold/50 underline-offset-2 mb-2">Kitchen Protocol:</p>
+              <div className="text-xs text-muted-foreground space-y-1">
+                <p>1: Select your meat</p>
+                <p>2: Cook to perfection</p>
+                <p>3: Slice for best presentation</p>
+              </div>
             </div>
           </div>
+          
+          {/* Right side - empty spacer to balance layout */}
+          <div className="w-[200px]"></div>
         </div>
 
         {(sliceScore > 0 || searingScore > 0) && (
