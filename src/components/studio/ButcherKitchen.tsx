@@ -3,6 +3,7 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { ChefHat, Play, RotateCcw, Save } from "lucide-react";
 import yakuzaKitchenOven from "@/assets/yakuza-kitchen-oven.jpg";
+import yakuzaOvenTools from "@/assets/yakuza-oven-tools.webp";
 import wagyuHero from "@/assets/wagyu-hero.jpg";
 import { SlicingGame } from "./SlicingGame";
 import { SearingGame } from "./SearingGame";
@@ -236,16 +237,8 @@ export const ButcherKitchen: React.FC = () => {
           {/* Knife Tools */}
           <div className="warrior-glass rounded-xl p-6 border border-warrior-gold/20">
             <h4 className="font-semibold text-foreground mb-4">Master's Toolkit</h4>
-            
-            <div className="flex items-center justify-center mb-6">
-              <img
-                src={yakuzaKitchenOven}
-                alt="Yakuza Kitchen Oven"
-                className="w-32 h-24 object-cover rounded-lg warrior-shadow"
-              />
-            </div>
 
-            <div className="grid grid-cols-2 gap-3">
+            <div className="grid grid-cols-2 gap-3 mb-4">
               <Button
                 variant="warrior"
                 size="lg"
@@ -254,7 +247,7 @@ export const ButcherKitchen: React.FC = () => {
                 className="w-full"
               >
                 <Play size={16} />
-                Lets Cook this Meat
+                Let's Cook this Meat
               </Button>
               
               <Button
@@ -266,6 +259,15 @@ export const ButcherKitchen: React.FC = () => {
                 <RotateCcw size={16} />
                 Reset
               </Button>
+            </div>
+
+            {/* Yakuza Oven with Tools - positioned under the buttons */}
+            <div className="flex items-center justify-center">
+              <img
+                src={yakuzaOvenTools}
+                alt="Yakuza Oven with Cooking Tools"
+                className="w-48 h-32 object-cover rounded-lg warrior-shadow"
+              />
             </div>
           </div>
         </>
