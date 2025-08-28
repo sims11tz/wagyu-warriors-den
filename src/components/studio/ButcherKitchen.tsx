@@ -3,7 +3,7 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { ChefHat, Play, RotateCcw, Save } from "lucide-react";
 import yakuzaKitchenOven from "@/assets/yakuza-kitchen-oven.jpg";
-import yakuzaStoveTopdown from "@/assets/yakuza-stove-topdown.webp";
+import yakuzaStoveWideTools from "@/assets/yakuza-stove-wide-tools.webp";
 import wagyuHero from "@/assets/wagyu-hero.jpg";
 import { SlicingGame } from "./SlicingGame";
 import { SearingGame } from "./SearingGame";
@@ -238,7 +238,7 @@ export const ButcherKitchen: React.FC = () => {
           <div 
             className="warrior-glass rounded-xl border border-warrior-gold/20 relative overflow-hidden"
             style={{
-              backgroundImage: `url(${yakuzaStoveTopdown})`,
+              backgroundImage: `url(${yakuzaStoveWideTools})`,
               backgroundSize: 'cover',
               backgroundPosition: 'center',
               backgroundRepeat: 'no-repeat'
