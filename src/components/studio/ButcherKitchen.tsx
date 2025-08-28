@@ -3,7 +3,7 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { ChefHat, Play, RotateCcw, Save } from "lucide-react";
 import yakuzaKitchenOven from "@/assets/yakuza-kitchen-oven.jpg";
-import yakuzaOvenTools from "@/assets/yakuza-oven-tools.webp";
+import yakuzaStoveTopdown from "@/assets/yakuza-stove-topdown.webp";
 import wagyuHero from "@/assets/wagyu-hero.jpg";
 import { SlicingGame } from "./SlicingGame";
 import { SearingGame } from "./SearingGame";
@@ -235,39 +235,44 @@ export const ButcherKitchen: React.FC = () => {
           </div>
 
           {/* Knife Tools */}
-          <div className="warrior-glass rounded-xl p-6 border border-warrior-gold/20">
-            <h4 className="font-semibold text-foreground mb-4">Master's Toolkit</h4>
+          <div 
+            className="warrior-glass rounded-xl border border-warrior-gold/20 relative overflow-hidden"
+            style={{
+              backgroundImage: `url(${yakuzaStoveTopdown})`,
+              backgroundSize: 'cover',
+              backgroundPosition: 'center',
+              backgroundRepeat: 'no-repeat'
+            }}
+          >
+            {/* Dark overlay for content readability */}
+            <div className="absolute inset-0 bg-black/50 backdrop-blur-[1px]" />
+            
+            {/* Content overlay */}
+            <div className="relative z-10 p-6">
+              <h4 className="font-semibold text-white mb-4">Master's Toolkit</h4>
 
-            <div className="grid grid-cols-2 gap-3 mb-4">
-              <Button
-                variant="warrior"
-                size="lg"
-                onClick={handleStartSlicing}
-                disabled={!selectedCut}
-                className="w-full"
-              >
-                <Play size={16} />
-                Let's Cook this Meat
-              </Button>
-              
-              <Button
-                variant="warrior-outline"
-                size="lg"
-                onClick={resetAllGames}
-                className="w-full"
-              >
-                <RotateCcw size={16} />
-                Reset
-              </Button>
-            </div>
-
-            {/* Yakuza Oven with Tools - positioned under the buttons */}
-            <div className="flex items-center justify-center">
-              <img
-                src={yakuzaOvenTools}
-                alt="Yakuza Oven with Cooking Tools"
-                className="w-48 h-32 object-cover rounded-lg warrior-shadow"
-              />
+              <div className="grid grid-cols-2 gap-3">
+                <Button
+                  variant="warrior"
+                  size="lg"
+                  onClick={handleStartSlicing}
+                  disabled={!selectedCut}
+                  className="w-full"
+                >
+                  <Play size={16} />
+                  Let's Cook this Meat
+                </Button>
+                
+                <Button
+                  variant="warrior-outline"
+                  size="lg"
+                  onClick={resetAllGames}
+                  className="w-full"
+                >
+                  <RotateCcw size={16} />
+                  Reset
+                </Button>
+              </div>
             </div>
           </div>
         </>
