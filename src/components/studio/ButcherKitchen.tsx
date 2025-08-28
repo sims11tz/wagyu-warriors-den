@@ -175,50 +175,56 @@ export const ButcherKitchen: React.FC = () => {
 
       {!isGameComplete && (
         <>
-          {/* Primal Selection */}
+          {/* Primal Selection with Background Image */}
           <div className="space-y-4">
             <h3 className="text-lg font-semibold text-foreground">Select Your Cut</h3>
-            <div className="grid grid-cols-2 gap-3">
-              {primalCuts.map((cut) => (
-                <button
-                  key={cut.id}
-                  onClick={() => setSelectedCut(cut.id)}
-                  className={`p-4 rounded-xl border-2 transition-all duration-300 ${
-                    selectedCut === cut.id
-                      ? "border-warrior-gold bg-warrior-gold/10 warrior-shadow-gold"
-                      : "border-warrior-smoke/30 bg-warrior-leather/20"
-                  }`}
-                >
-                  <div className="text-left">
-                    <h4 className="font-semibold text-foreground">{cut.name}</h4>
-                    <Badge 
-                      variant="outline" 
-                      className={`mt-2 text-xs border-${cut.color}/50 text-${cut.color}`}
-                    >
-                      {cut.grade}
-                    </Badge>
-                  </div>
-                </button>
-              ))}
-            </div>
-          </div>
-
-          {/* Cutting Board */}
-          <div className="warrior-glass rounded-xl p-6 border border-warrior-gold/20">
-            <div className="relative">
-              <img
-                src={wagyuHero}
-                alt="Wagyu Cutting Board"
-                className="w-full h-48 object-cover rounded-lg"
-              />
+            <div 
+              className="relative rounded-xl overflow-hidden"
+              style={{
+                backgroundImage: `url(${wagyuHero})`,
+                backgroundSize: 'cover',
+                backgroundPosition: 'center',
+                backgroundRepeat: 'no-repeat'
+              }}
+            >
+              {/* Dark overlay for better button visibility */}
+              <div className="absolute inset-0 bg-black/40 backdrop-blur-[1px]" />
+              
+              <div className="relative z-10 p-6 grid grid-cols-2 gap-3">
+                {primalCuts.map((cut) => (
+                  <button
+                    key={cut.id}
+                    onClick={() => setSelectedCut(cut.id)}
+                    className={`p-4 rounded-xl border-2 transition-all duration-300 backdrop-blur-sm ${
+                      selectedCut === cut.id
+                        ? "border-warrior-gold bg-warrior-gold/20 warrior-shadow-gold"
+                        : "border-white/30 bg-white/10 hover:bg-white/20"
+                    }`}
+                  >
+                    <div className="text-left">
+                      <h4 className="font-semibold text-white">{cut.name}</h4>
+                      <Badge 
+                        variant="outline" 
+                        className={`mt-2 text-xs ${
+                          selectedCut === cut.id 
+                            ? `border-${cut.color}/50 text-${cut.color}` 
+                            : 'border-white/50 text-white bg-white/10'
+                        }`}
+                      >
+                        {cut.grade}
+                      </Badge>
+                    </div>
+                  </button>
+                ))}
+              </div>
               
               {selectedCut && (
-                <div className="absolute inset-0 flex items-center justify-center bg-black/50 rounded-lg">
+                <div className="absolute inset-0 flex items-center justify-center bg-black/20 rounded-xl">
                   <div className="text-center">
                     <div className="w-16 h-16 warrior-gradient-gold rounded-full flex items-center justify-center mb-4 mx-auto">
                       <ChefHat size={24} className="text-warrior-dark" />
                     </div>
-                    <p className="text-white font-medium">
+                    <p className="text-white font-medium text-lg shadow-lg">
                       {primalCuts.find(c => c.id === selectedCut)?.name} Ready
                     </p>
                   </div>
