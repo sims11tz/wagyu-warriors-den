@@ -149,8 +149,19 @@ export const ButcherKitchen: React.FC = () => {
             </div>
           </div>
           
-          {/* Right side - empty spacer to balance layout */}
-          <div className="w-[200px]"></div>
+          {/* Right side - Selected Cut Indicator */}
+          <div className="w-[200px] flex justify-end">
+            {selectedCut && (
+              <div className="text-center">
+                <div className="w-12 h-12 warrior-gradient-gold rounded-full flex items-center justify-center mb-2 mx-auto">
+                  <ChefHat size={16} className="text-warrior-dark" />
+                </div>
+                <p className="text-warrior-gold font-medium text-sm">
+                  {primalCuts.find(c => c.id === selectedCut)?.name} Ready
+                </p>
+              </div>
+            )}
+          </div>
         </div>
 
         {(sliceScore > 0 || searingScore > 0) && (
@@ -218,19 +229,6 @@ export const ButcherKitchen: React.FC = () => {
                   </button>
                 ))}
               </div>
-              
-              {selectedCut && (
-                <div className="absolute inset-0 flex items-center justify-center bg-black/20 rounded-xl">
-                  <div className="text-center">
-                    <div className="w-16 h-16 warrior-gradient-gold rounded-full flex items-center justify-center mb-4 mx-auto">
-                      <ChefHat size={24} className="text-warrior-dark" />
-                    </div>
-                    <p className="text-white font-medium text-lg shadow-lg">
-                      {primalCuts.find(c => c.id === selectedCut)?.name} Ready
-                    </p>
-                  </div>
-                </div>
-              )}
             </div>
           </div>
 
