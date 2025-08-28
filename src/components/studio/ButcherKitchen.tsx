@@ -136,7 +136,7 @@ export const ButcherKitchen: React.FC = () => {
           </div>
           
           {/* Instructions */}
-          <div className="text-right">
+          <div className="text-center">
             <p className="text-xs text-warrior-gold/80 font-medium">Kitchen Protocol:</p>
             <div className="text-xs text-muted-foreground space-y-1 mt-1">
               <p>1: Select your meat</p>
