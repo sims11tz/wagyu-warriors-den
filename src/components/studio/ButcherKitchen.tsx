@@ -255,7 +255,7 @@ export const ButcherKitchen: React.FC = () => {
                   size="lg"
                   onClick={handleStartSlicing}
                   disabled={!selectedCut}
-                  className="w-full"
+                  className="w-full hover:scale-100"
                 >
                   <Play size={16} />
                   Let's Cook this Meat
