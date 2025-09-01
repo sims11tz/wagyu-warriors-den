@@ -251,11 +251,11 @@ export const ButcherKitchen: React.FC = () => {
 
               <div className="grid grid-cols-2 gap-3">
                 <Button
-                  variant="warrior"
+                  variant="warrior-ghost"
                   size="lg"
                   onClick={handleStartSlicing}
                   disabled={!selectedCut}
-                  className="w-full hover:scale-100"
+                  className="w-full"
                 >
                   <Play size={16} />
                   Let's Cook this Meat
