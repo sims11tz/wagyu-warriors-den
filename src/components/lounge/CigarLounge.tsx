@@ -98,92 +98,128 @@ export const CigarLounge = () => {
         </div>
 
         {currentLounge ? (
-          <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-            {/* Left Column - Lounge Info & Tabs */}
-            <div className="lg:col-span-2 space-y-6">
-              {/* Current Lounge Info */}
-              <Card className="warrior-glass border-warrior-gold/20">
-                <CardHeader>
-                  <div className="flex items-center justify-between">
-                    <div>
-                      <CardTitle className="text-foreground flex items-center space-x-2">
-                        <Users className="text-warrior-gold" size={20} />
-                        <span>{currentLounge.name}</span>
-                      </CardTitle>
-                      <p className="text-sm text-muted-foreground mt-1">
-                        {members.length}/{currentLounge.max_members} members
-                      </p>
-                    </div>
-                    <Button
-                      onClick={leaveCurrentLounge}
-                      variant="warrior-outline"
-                      size="sm"
-                      className="flex items-center space-x-1"
-                    >
-                      <LogOut size={14} />
-                      <span>Leave</span>
-                    </Button>
+          <div className="space-y-6">
+            {/* Current Lounge Info */}
+            <Card className="warrior-glass border-warrior-gold/20">
+              <CardHeader>
+                <div className="flex items-center justify-between">
+                  <div>
+                    <CardTitle className="text-foreground flex items-center space-x-2">
+                      <Users className="text-warrior-gold" size={20} />
+                      <span>{currentLounge.name}</span>
+                    </CardTitle>
+                    <p className="text-sm text-muted-foreground mt-1">
+                      {members.length}/{currentLounge.max_members} members
+                    </p>
                   </div>
-                </CardHeader>
-              </Card>
+                  <Button
+                    onClick={leaveCurrentLounge}
+                    variant="warrior-outline"
+                    size="sm"
+                    className="flex items-center space-x-1"
+                  >
+                    <LogOut size={14} />
+                    <span>Leave</span>
+                  </Button>
+                </div>
+              </CardHeader>
+            </Card>
 
-              {/* Tab Navigation */}
-              <div className="flex space-x-1 bg-warrior-leather/10 p-1 rounded-lg">
-                <Button
-                  variant={activeTab === 'lounge' ? 'warrior' : 'ghost'}
-                  size="sm"
-                  onClick={() => setActiveTab('lounge')}
-                  className="flex-1"
-                >
-                  <Users size={16} className="mr-2" />
-                  Lounge
-                </Button>
-                <Button
-                  variant={activeTab === 'game' ? 'warrior' : 'ghost'}
-                  size="sm"
-                  onClick={() => setActiveTab('game')}
-                  className="flex-1"
-                >
-                  <Cigarette size={16} className="mr-2" />
-                  Cigar Selection
-                </Button>
-                <Button
-                  variant={activeTab === 'robot' ? 'warrior' : 'ghost'}
-                  size="sm"
-                  onClick={() => setActiveTab('robot')}
-                  className="flex-1"
-                >
-                  <Wine size={16} className="mr-2" />
-                  Order Drinks
-                </Button>
+            {/* Tab Navigation */}
+            <div className="flex space-x-1 bg-warrior-leather/10 p-1 rounded-lg">
+              <Button
+                variant={activeTab === 'lounge' ? 'warrior' : 'ghost'}
+                size="sm"
+                onClick={() => setActiveTab('lounge')}
+                className="flex-1"
+              >
+                <Users size={16} className="mr-2" />
+                Lounge
+              </Button>
+              <Button
+                variant={activeTab === 'game' ? 'warrior' : 'ghost'}
+                size="sm"
+                onClick={() => setActiveTab('game')}
+                className="flex-1"
+              >
+                <Cigarette size={16} className="mr-2" />
+                Cigar Selection
+              </Button>
+              <Button
+                variant={activeTab === 'robot' ? 'warrior' : 'ghost'}
+                size="sm"
+                onClick={() => setActiveTab('robot')}
+                className="flex-1"
+              >
+                <Wine size={16} className="mr-2" />
+                Order Drinks
+              </Button>
+            </div>
+
+            {/* Tab Content */}
+            {activeTab === 'lounge' && (
+              <LoungeVisualizer 
+                members={members} 
+                currentUserId={user?.id}
+                onCigarClick={() => setActiveTab('game')}
+                onDrinkClick={() => setActiveTab('robot')}
+                onBartenderClick={() => setActiveTab('robot')}
+                activeTab={activeTab}
+                setActiveTab={setActiveTab}
+                onDrinkProgressUpdate={updateDrinkProgress}
+                onCigarStatusUpdate={updateCigarStatus}
+                loungeId={currentLounge?.id}
+              />
+            )}
+
+            {activeTab === 'game' && currentMember && (
+              <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+                <div className="lg:col-span-2">
+                  <CigarGame
+                    currentStatus={currentMember.cigar_status}
+                    onStatusChange={(status, cigarId) => updateCigarStatus(status as any, cigarId)}
+                    selectedCigarId={currentMember.selected_cigar_id || undefined}
+                  />
+                </div>
+                <div className="space-y-6">
+                  <Card className="warrior-glass border-warrior-gold/20">
+                    <CardHeader>
+                      <CardTitle className="text-foreground">Members</CardTitle>
+                    </CardHeader>
+                    <CardContent className="space-y-3">
+                      {members.map((member) => (
+                        <div key={member.id} className="flex items-center justify-between p-3 bg-warrior-leather/10 rounded-lg">
+                          <div className="flex items-center space-x-3">
+                            <div className="w-8 h-8 rounded-full bg-warrior-gold/20 flex items-center justify-center text-sm font-medium text-warrior-gold">
+                              {(member.handle || 'A')[0].toUpperCase()}
+                            </div>
+                            <div>
+                              <div className="text-sm font-medium text-foreground">
+                                {member.user_id === user?.id ? 'You' : (member.handle || 'Anonymous')}
+                              </div>
+                              <div className="text-xs text-muted-foreground">
+                                {member.cigar_status}
+                              </div>
+                            </div>
+                          </div>
+                          <Badge variant="outline" className="text-xs">
+                            {member.cigar_status === 'selecting' && '🤔'}
+                            {member.cigar_status === 'cut' && '✂️'}
+                            {member.cigar_status === 'lit' && '🔥'}
+                            {member.cigar_status === 'smoking' && '💨'}
+                            {member.cigar_status === 'finished' && '✅'}
+                          </Badge>
+                        </div>
+                      ))}
+                    </CardContent>
+                  </Card>
+                </div>
               </div>
+            )}
 
-              {/* Tab Content */}
-              {activeTab === 'lounge' && (
-                <LoungeVisualizer 
-                  members={members} 
-                  currentUserId={user?.id}
-                  onCigarClick={() => setActiveTab('game')}
-                  onDrinkClick={() => setActiveTab('robot')}
-                  onBartenderClick={() => setActiveTab('robot')}
-                  activeTab={activeTab}
-                  setActiveTab={setActiveTab}
-                  onDrinkProgressUpdate={updateDrinkProgress}
-                  onCigarStatusUpdate={updateCigarStatus}
-                  loungeId={currentLounge?.id}
-                />
-              )}
-
-              {activeTab === 'game' && currentMember && (
-                <CigarGame
-                  currentStatus={currentMember.cigar_status}
-                  onStatusChange={(status, cigarId) => updateCigarStatus(status as any, cigarId)}
-                  selectedCigarId={currentMember.selected_cigar_id || undefined}
-                />
-              )}
-
-              {activeTab === 'robot' && (
-                <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+            {activeTab === 'robot' && (
+              <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+                <div className="lg:col-span-2 grid grid-cols-1 lg:grid-cols-2 gap-6">
                   <YakuzaRobot 
                     onOrderDrink={orderDrink}
                     isVisible={true}
@@ -197,43 +233,41 @@ export const CigarLounge = () => {
                     isActive={!!currentMember?.drink_order_id}
                   />
                 </div>
-              )}
-            </div>
-
-            {/* Right Column - Members List */}
-            <div className="space-y-6">
-              <Card className="warrior-glass border-warrior-gold/20">
-                <CardHeader>
-                  <CardTitle className="text-foreground">Members</CardTitle>
-                </CardHeader>
-                <CardContent className="space-y-3">
-                  {members.map((member) => (
-                    <div key={member.id} className="flex items-center justify-between p-3 bg-warrior-leather/10 rounded-lg">
-                      <div className="flex items-center space-x-3">
-                        <div className="w-8 h-8 rounded-full bg-warrior-gold/20 flex items-center justify-center text-sm font-medium text-warrior-gold">
-                          {(member.handle || 'A')[0].toUpperCase()}
-                        </div>
-                        <div>
-                          <div className="text-sm font-medium text-foreground">
-                            {member.user_id === user?.id ? 'You' : (member.handle || 'Anonymous')}
+                <div className="space-y-6">
+                  <Card className="warrior-glass border-warrior-gold/20">
+                    <CardHeader>
+                      <CardTitle className="text-foreground">Members</CardTitle>
+                    </CardHeader>
+                    <CardContent className="space-y-3">
+                      {members.map((member) => (
+                        <div key={member.id} className="flex items-center justify-between p-3 bg-warrior-leather/10 rounded-lg">
+                          <div className="flex items-center space-x-3">
+                            <div className="w-8 h-8 rounded-full bg-warrior-gold/20 flex items-center justify-center text-sm font-medium text-warrior-gold">
+                              {(member.handle || 'A')[0].toUpperCase()}
+                            </div>
+                            <div>
+                              <div className="text-sm font-medium text-foreground">
+                                {member.user_id === user?.id ? 'You' : (member.handle || 'Anonymous')}
+                              </div>
+                              <div className="text-xs text-muted-foreground">
+                                {member.cigar_status}
+                              </div>
+                            </div>
                           </div>
-                          <div className="text-xs text-muted-foreground">
-                            {member.cigar_status}
-                          </div>
+                          <Badge variant="outline" className="text-xs">
+                            {member.cigar_status === 'selecting' && '🤔'}
+                            {member.cigar_status === 'cut' && '✂️'}
+                            {member.cigar_status === 'lit' && '🔥'}
+                            {member.cigar_status === 'smoking' && '💨'}
+                            {member.cigar_status === 'finished' && '✅'}
+                          </Badge>
                         </div>
-                      </div>
-                      <Badge variant="outline" className="text-xs">
-                        {member.cigar_status === 'selecting' && '🤔'}
-                        {member.cigar_status === 'cut' && '✂️'}
-                        {member.cigar_status === 'lit' && '🔥'}
-                        {member.cigar_status === 'smoking' && '💨'}
-                        {member.cigar_status === 'finished' && '✅'}
-                      </Badge>
-                    </div>
-                  ))}
-                </CardContent>
-              </Card>
-            </div>
+                      ))}
+                    </CardContent>
+                  </Card>
+                </div>
+              </div>
+            )}
           </div>
         ) : (
           /* Available Lounges */
